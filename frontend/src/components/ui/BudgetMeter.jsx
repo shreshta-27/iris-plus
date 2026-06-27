@@ -9,34 +9,29 @@ export default function BudgetMeter({ budget }) {
   const percentage = Math.min((totalCost / maxBudget) * 100, 100);
   
   let statusColor = 'bg-mint';
-  if (mode === 'warning') statusColor = 'bg-sunny';
-  if (mode === 'exceeded') statusColor = 'bg-coral';
+  let dotColor = 'bg-mint';
+  if (mode === 'warning') { statusColor = 'bg-sunny'; dotColor = 'bg-sunny'; }
+  if (mode === 'exceeded') { statusColor = 'bg-coral'; dotColor = 'bg-coral'; }
 
   return (
-    <div className="bg-cream border-[4px] border-ink p-3 shadow-[6px_6px_0_#1A1A2E] flex flex-col gap-3 w-full max-w-sm rounded-2xl hover:-translate-y-1 transition-transform">
-      <div className="flex justify-between items-center px-1">
-        <div className="flex items-center gap-2">
-          <RiWallet3Line className="text-ink w-5 h-5" />
-          <span className="font-black text-sm uppercase tracking-widest text-ink">Session Budget</span>
-        </div>
-        <div className="font-mono font-bold text-sm text-ink bg-white px-3 py-1 border-[3px] border-ink rounded-full shadow-[2px_2px_0_#1A1A2E]">
-          ${totalCost.toFixed(4)} <span className="text-ink/50">/ ${maxBudget.toFixed(2)}</span>
-        </div>
-      </div>
+    <div className="flex items-center gap-3 w-full">
+      {/* Animated status dot */}
+      <div className={`w-3 h-3 rounded-full ${dotColor} border-2 border-ink shrink-0 ${mode !== 'normal' ? 'animate-pulse' : ''}`} />
       
-      <div className="h-6 w-full bg-white border-[4px] border-ink rounded-full shadow-[inset_4px_4px_0_rgba(0,0,0,0.1)] overflow-hidden relative">
+      {/* Progress bar */}
+      <div className="flex-1 h-3 bg-white border-[3px] border-ink rounded-full overflow-hidden relative min-w-[60px]">
         <motion.div 
-          className={`h-full ${statusColor} border-r-[3px] border-ink rounded-r-full`}
+          className={`h-full ${statusColor} rounded-full`}
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
-          transition={{ type: 'spring', stiffness: 50 }}
+          transition={{ type: 'spring', stiffness: 60, damping: 15 }}
         />
-        {/* Zebra stripes for Neo-Brutalist effect on progress bar */}
-        <div 
-          className="absolute inset-0 opacity-20 pointer-events-none" 
-          style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, #1A1A2E 10px, #1A1A2E 20px)' }}
-        ></div>
       </div>
+      
+      {/* Cost text */}
+      <span className="font-mono font-bold text-xs text-ink whitespace-nowrap shrink-0">
+        ${totalCost.toFixed(2)}<span className="text-ink/40">/${maxBudget.toFixed(0)}</span>
+      </span>
     </div>
   );
 }

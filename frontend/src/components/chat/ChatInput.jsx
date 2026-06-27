@@ -39,23 +39,23 @@ export default function ChatInput({ onSend, disabled, budgetExceeded }) {
     const ta = textareaRef.current;
     if (ta) {
       ta.style.height = 'auto';
-      ta.style.height = Math.min(ta.scrollHeight, 200) + 'px';
+      ta.style.height = Math.min(ta.scrollHeight, 160) + 'px';
     }
   };
 
   return (
-    <div className="border-t-[4px] border-ink bg-cream p-4 md:p-6 relative z-20">
+    <div className="border-t-[4px] border-ink bg-white p-3 md:p-4 relative z-20">
       <div className="max-w-4xl mx-auto">
         {budgetExceeded && (
-          <div className="mb-4 px-5 py-4 bg-coral border-[4px] border-ink rounded-2xl flex items-center gap-3 shadow-[4px_4px_0_#1A1A2E]">
-            <RiErrorWarningLine className="w-6 h-6 text-ink flex-shrink-0" />
-            <p className="text-ink font-black text-sm uppercase tracking-wider leading-tight">
-              Budget Exceeded ($2.00 limit reached). Reset session.
+          <div className="mb-3 px-4 py-3 bg-coral border-[3px] border-ink rounded-xl flex items-center gap-2 shadow-[3px_3px_0_#1A1A2E]">
+            <RiErrorWarningLine className="w-5 h-5 text-ink flex-shrink-0" />
+            <p className="text-ink font-black text-xs uppercase tracking-wider leading-tight">
+              Budget Exceeded ($2.00 limit). Reset session.
             </p>
           </div>
         )}
         
-        <div className="flex items-end gap-3 md:gap-4 relative">
+        <div className="flex items-end gap-3 relative">
           <textarea
             ref={textareaRef}
             value={message}
@@ -64,27 +64,27 @@ export default function ChatInput({ onSend, disabled, budgetExceeded }) {
             placeholder={budgetExceeded ? 'Budget exceeded...' : 'Ask IRIS anything...'}
             disabled={disabled || budgetExceeded}
             rows={1}
-            className="w-full bg-white border-[4px] border-ink rounded-[2rem] text-ink p-4 md:py-5 md:px-6 outline-none transition-all duration-300 font-medium resize-none min-h-[64px] max-h-[200px] disabled:opacity-50 disabled:bg-cream disabled:cursor-not-allowed text-lg shadow-[6px_6px_0_#1A1A2E] focus:border-iris-purple focus:shadow-[6px_6px_0_var(--color-iris-purple)] focus:translate-y-[-2px] custom-scrollbar"
+            className="w-full bg-cream border-[3px] border-ink rounded-2xl text-ink py-3.5 px-5 outline-none transition-all duration-300 font-medium resize-none min-h-[52px] max-h-[160px] disabled:opacity-50 disabled:cursor-not-allowed text-base shadow-[4px_4px_0_#1A1A2E] focus:border-iris-purple focus:shadow-[4px_4px_0_var(--color-iris-purple)] custom-scrollbar placeholder:text-ink/40"
           />
           <button
             onClick={handleSend}
             disabled={!message.trim() || sending || disabled || budgetExceeded}
-            className="bg-iris-purple text-white border-[4px] border-ink rounded-full p-4 md:p-5 h-[64px] w-[64px] flex-shrink-0 flex items-center justify-center shadow-[6px_6px_0_#1A1A2E] hover:translate-y-[-2px] hover:shadow-[8px_8px_0_#1A1A2E] active:translate-y-[4px] active:shadow-[0_0_0_#1A1A2E] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-iris-purple text-white border-[3px] border-ink rounded-full h-[52px] w-[52px] flex-shrink-0 flex items-center justify-center shadow-[4px_4px_0_#1A1A2E] hover:-translate-y-0.5 hover:shadow-[5px_5px_0_#1A1A2E] active:translate-y-[3px] active:shadow-[1px_1px_0_#1A1A2E] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {sending ? (
-              <RiLoader4Line className="w-7 h-7 animate-spin text-white" />
+              <RiLoader4Line className="w-6 h-6 animate-spin text-white" />
             ) : (
-              <RiSendPlaneLine className="w-7 h-7 text-white ml-1" />
+              <RiSendPlaneLine className="w-6 h-6 text-white" />
             )}
           </button>
         </div>
         
-        <div className="flex justify-between items-center mt-4 px-2">
-          <p className="text-xs text-ink/60 font-black uppercase tracking-widest">
+        <div className="flex justify-between items-center mt-2 px-1">
+          <p className="text-[10px] text-ink/40 font-bold uppercase tracking-widest">
             Shift+Enter for new line
           </p>
-          <p className="text-xs text-ink/40 font-mono font-bold bg-white px-2 py-0.5 border-2 border-ink/20 rounded-lg">
-            Rate Limit: 15/min
+          <p className="text-[10px] text-ink/30 font-mono font-bold">
+            15/min
           </p>
         </div>
       </div>

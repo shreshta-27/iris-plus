@@ -1,5 +1,6 @@
 'use client';
 import { useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import ChatMessage from './ChatMessage';
 import TypingIndicator from './TypingIndicator';
 
@@ -13,49 +14,69 @@ export default function ChatWindow({ messages, isLoading }) {
   return (
     <div className="flex-1 overflow-y-auto bg-[#FDF9F3] p-4 sm:p-6 lg:p-8 custom-scrollbar">
       {messages.length === 0 && !isLoading && (
-        <div className="flex flex-col items-center justify-center h-full text-center py-10">
-          <div className="text-6xl mb-6 animate-wiggle">✦</div>
-          <h2 className="text-4xl font-black text-ink mb-4 tracking-tight">Welcome to IRIS</h2>
-          <p className="text-ink/70 font-bold max-w-md mb-10 text-lg">
+        <div className="flex flex-col items-center justify-center h-full text-center px-4">
+          {/* Animated hero icon */}
+          <motion.div 
+            className="text-5xl md:text-6xl mb-4"
+            animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          >
+            ✦
+          </motion.div>
+          <h2 className="text-3xl md:text-4xl font-black text-ink mb-3 tracking-tight">Welcome to IRIS</h2>
+          <p className="text-ink/70 font-bold max-w-md mb-8 text-base md:text-lg leading-relaxed">
             Ask anything — from simple facts to complex code problems. Watch how IRIS routes each query.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl w-full px-4">
+          
+          {/* Suggestion cards - compact layout to avoid overlapping input */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl w-full">
             {[
-              { label: 'Simple', example: '"What is HTTP?"', tier: 'Kimi K2.6', color: 'mint' },
-              { label: 'Medium', example: '"Explain TCP vs UDP"', tier: 'Haiku 4.5', color: 'sunny' },
-              { label: 'Complex', example: '"Write a REST API"', tier: 'Sonnet 4.6', color: 'coral' },
+              { label: 'Simple', example: '"What is HTTP?"', tier: 'Kimi K2.6', color: 'mint', borderColor: '#6BCB77' },
+              { label: 'Medium', example: '"Explain TCP vs UDP"', tier: 'Haiku 4.5', color: 'sunny', borderColor: '#FFD93D' },
+              { label: 'Complex', example: '"Write a REST API"', tier: 'Sonnet 4.6', color: 'coral', borderColor: '#FF6B6B' },
             ].map((item, index) => (
-              <div 
-                key={item.label} 
-                className={`neo-card bg-white p-6 rounded-3xl border-t-[16px] border-t-${item.color} text-left flex flex-col`}
-                style={{ animationDelay: `${index * 100}ms` }}
+              <motion.div 
+                key={item.label}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 + index * 0.1, type: "spring", stiffness: 200 }}
+                className="bg-white p-4 md:p-5 rounded-2xl border-[4px] border-ink text-left flex flex-col relative overflow-hidden"
+                style={{ 
+                  boxShadow: '6px 6px 0px #1A1A2E',
+                  borderTopWidth: '10px',
+                  borderTopColor: item.borderColor
+                }}
+                whileHover={{ y: -4, boxShadow: '8px 8px 0px #1A1A2E' }}
               >
-                <div className="flex justify-between items-start mb-4">
-                  <p className="text-xs font-black uppercase text-ink/60 tracking-widest">{item.label}</p>
-                  <span className={`w-3 h-3 rounded-full bg-${item.color} border-[2px] border-ink shadow-[2px_2px_0_#1A1A2E]`}></span>
+                <div className="flex justify-between items-center mb-3">
+                  <p className="text-[10px] font-black uppercase text-ink/50 tracking-[0.2em]">{item.label}</p>
+                  <span 
+                    className="w-2.5 h-2.5 rounded-full border-2 border-ink"
+                    style={{ backgroundColor: item.borderColor }}
+                  />
                 </div>
-                <p className="text-base text-ink font-bold mb-6 flex-grow">
+                <p className="text-sm font-bold text-ink mb-4 flex-grow leading-snug">
                   {item.example}
                 </p>
                 <div>
-                  <span className="tag-sticker bg-white text-[10px] text-ink shadow-[2px_2px_0_#1A1A2E]">
+                  <span className="inline-block px-2.5 py-1 font-bold text-[9px] uppercase border-[2px] border-ink bg-cream text-ink rounded-full tracking-wider">
                     → {item.tier}
                   </span>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
       )}
 
-      <div className="space-y-6 max-w-4xl mx-auto">
+      <div className="space-y-5 max-w-4xl mx-auto">
         {messages.map((msg, i) => (
           <ChatMessage key={i} message={msg} />
         ))}
 
         {isLoading && <TypingIndicator />}
         
-        <div ref={bottomRef} className="h-6" />
+        <div ref={bottomRef} className="h-4" />
       </div>
     </div>
   );
