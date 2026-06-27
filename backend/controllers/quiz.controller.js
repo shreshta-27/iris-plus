@@ -1,5 +1,6 @@
 import { getDegradedModel, recordSpend, getAllBudgetStats } from '../services/budget.service.js';
 import { callOtari } from '../services/otari.service.js';
+import { emitRoutingEvent } from '../services/socket.service.js';
 import { MODELS } from '../config/otari.js';
 import { QuizAttempt } from '../models/QuizAttempt.model.js';
 
@@ -35,6 +36,14 @@ export async function generateQuiz(req, res, next) {
     }
 
     await recordSpend(sessionId, model, result.cost, { tier: 'complex', reason: 'Quiz generation' });
+
+    emitRoutingEvent(sessionId, {
+      tier: 'complex',
+      modelDisplayName: model.includes('Kimi') ? 'Kimi K2.6' : model.includes('Haiku') ? 'Haiku 4.5' : 'Sonnet 4.6',
+      reason: 'Quiz generation requires content synthesis',
+      cost: result.cost,
+      score: 85
+    });
 
     let questions;
     try {
@@ -101,6 +110,14 @@ export async function submitQuizAnswers(req, res, next) {
       });
       feedback = feedbackResult.answer;
       await recordSpend(sessionId, model, feedbackResult.cost, { tier: 'medium', reason: 'Quiz feedback generation' });
+      
+      emitRoutingEvent(sessionId, {
+        tier: 'medium',
+        modelDisplayName: model.includes('Kimi') ? 'Kimi K2.6' : model.includes('Haiku') ? 'Haiku 4.5' : 'Sonnet 4.6',
+        reason: 'Quiz feedback generation',
+        cost: feedbackResult.cost,
+        score: 50
+      });
     }
 
     attempt.score = score;

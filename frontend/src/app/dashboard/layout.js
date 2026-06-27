@@ -55,7 +55,7 @@ export default function DashboardLayout({ children }) {
   }
 
   return (
-    <div className="flex h-screen bg-[#FDF9F3] text-ink overflow-hidden p-2 md:p-3 gap-3">
+    <div className="flex h-screen bg-[#FDF9F3] text-ink overflow-hidden p-4 md:p-6 gap-4">
       
       {/* Mobile Sidebar Overlay Backdrop */}
       <AnimatePresence>

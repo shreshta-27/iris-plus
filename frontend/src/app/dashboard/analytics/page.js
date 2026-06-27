@@ -40,69 +40,72 @@ export default function AnalyticsDashboard() {
   }));
 
   return (
-    <div className="space-y-6 animate-slide-up">
-      <div>
-        <h1 className="text-2xl font-black uppercase tracking-widest mb-2">Usage & Analytics</h1>
-        <p className="text-sm text-gray-400 font-mono">Real-time insights into your AI budget and routing efficiency.</p>
+    <div className="space-y-6 animate-slide-up pr-2 custom-scrollbar">
+      <div className="inline-flex items-center gap-3 bg-mint border-[4px] border-ink px-5 py-2.5 shadow-[6px_6px_0_#1A1A2E] rounded-2xl mb-2 -rotate-1 hover:rotate-0 transition-transform cursor-default">
+        <span className="text-2xl">📊</span>
+        <h1 className="text-2xl md:text-3xl font-black text-ink uppercase tracking-tight">Usage & Analytics</h1>
       </div>
+      <p className="text-ink font-bold text-base md:text-lg opacity-80 ml-1 mb-6">Real-time insights into your AI budget and routing efficiency.</p>
 
       {/* Top Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-brutal-card border-2 border-brutal-border p-4 flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-gray-400">
-            <RiRouteLine className="w-5 h-5" />
-            <span className="text-xs uppercase font-bold">Total Queries</span>
+        <div className="bg-white border-[4px] border-ink shadow-[4px_4px_0_#1A1A2E] rounded-2xl p-5 flex flex-col gap-2 relative overflow-hidden">
+          <div className="flex items-center gap-2 text-ink/70 z-10">
+            <RiRouteLine className="w-5 h-5 text-ink" />
+            <span className="text-xs uppercase font-black tracking-widest text-ink">Total Queries</span>
           </div>
-          <span className="text-3xl font-black">{data.summary.totalCalls}</span>
+          <span className="text-4xl font-black text-ink z-10 mt-2">{data.summary.totalCalls}</span>
         </div>
         
-        <div className="bg-brutal-card border-2 border-brutal-border p-4 flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-gray-400">
-            <RiMoneyDollarCircleLine className="w-5 h-5" />
-            <span className="text-xs uppercase font-bold">Actual Cost</span>
+        <div className="bg-sunny border-[4px] border-ink shadow-[4px_4px_0_#1A1A2E] rounded-2xl p-5 flex flex-col gap-2 relative overflow-hidden">
+          <div className="flex items-center gap-2 text-ink/70 z-10">
+            <RiMoneyDollarCircleLine className="w-5 h-5 text-ink" />
+            <span className="text-xs uppercase font-black tracking-widest text-ink">Actual Cost</span>
           </div>
-          <span className="text-3xl font-black text-white">${data.summary.totalCost.toFixed(4)}</span>
+          <span className="text-4xl font-black text-ink z-10 mt-2">${data.summary.totalCost.toFixed(4)}</span>
         </div>
 
-        <div className="bg-emerald-500/10 border-2 border-emerald-500 p-4 flex flex-col gap-2 lg:col-span-2 relative overflow-hidden">
-          <div className="flex items-center gap-2 text-emerald-400 z-10">
-            <RiLineChartLine className="w-5 h-5" />
-            <span className="text-xs uppercase font-bold">IRIS Saved You</span>
+        <div className="bg-mint border-[4px] border-ink shadow-[4px_4px_0_#1A1A2E] rounded-2xl p-5 flex flex-col gap-2 lg:col-span-2 relative overflow-hidden">
+          <div className="flex items-center gap-2 z-10">
+            <RiLineChartLine className="w-5 h-5 text-ink" />
+            <span className="text-xs uppercase font-black tracking-widest text-ink">IRIS Saved You</span>
           </div>
-          <div className="flex items-end gap-3 z-10">
-            <span className="text-3xl font-black text-emerald-400">${data.summary.savedCost.toFixed(4)}</span>
-            <span className="text-sm font-bold text-emerald-500 bg-emerald-500/20 px-2 py-0.5 mb-1">
+          <div className="flex items-end gap-3 z-10 mt-1">
+            <span className="text-4xl font-black text-ink">${data.summary.savedCost.toFixed(4)}</span>
+            <span className="text-sm font-black text-white bg-ink px-3 py-1 rounded-full mb-1 border-2 border-white shadow-[2px_2px_0_#1A1A2E]">
               {data.summary.savingsPercent}% savings
             </span>
           </div>
-          <p className="text-[10px] text-gray-400 font-mono mt-1 z-10">Compared to routing all queries to Claude Sonnet 4.6</p>
-          <RiMoneyDollarCircleLine className="absolute -right-4 -bottom-8 w-32 h-32 text-emerald-500/10 rotate-12" />
+          <p className="text-xs font-bold text-ink/80 mt-2 z-10">Compared to routing all queries to Claude Sonnet 4.6</p>
+          <RiMoneyDollarCircleLine className="absolute -right-6 -bottom-10 w-40 h-40 text-white/20 rotate-12" />
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Cost over time */}
-        <div className="bg-brutal-card border-2 border-brutal-border p-4">
-          <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6">Cost Per Query Timeline</h3>
-          <div className="h-64">
+        <div className="bg-white border-[4px] border-ink shadow-[6px_6px_0_#1A1A2E] rounded-3xl p-6">
+          <h3 className="text-sm font-black uppercase tracking-widest text-ink border-b-4 border-ink pb-2 mb-6 inline-block">Cost Per Query Timeline</h3>
+          <div className="h-64 mt-4">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={historyChartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                <XAxis dataKey="name" stroke="#666" fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis stroke="#666" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v.toFixed(3)}`} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#CBD5E1" />
+                <XAxis dataKey="name" stroke="#0f172a" fontSize={12} fontWeight="bold" tickLine={false} axisLine={false} />
+                <YAxis stroke="#0f172a" fontSize={12} fontWeight="bold" tickLine={false} axisLine={false} tickFormatter={(v) => `$${v.toFixed(3)}`} />
                 <RechartsTooltip 
-                  contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '0' }}
-                  itemStyle={{ color: '#fff', fontSize: '12px' }}
+                  contentStyle={{ backgroundColor: '#fff', border: '3px solid #0f172a', borderRadius: '12px', boxShadow: '4px 4px 0 #1A1A2E' }}
+                  itemStyle={{ color: '#0f172a', fontSize: '14px', fontWeight: 'bold' }}
                 />
-                <Line type="monotone" dataKey="cost" stroke="#10b981" strokeWidth={2} dot={{ r: 3, fill: '#10b981' }} activeDot={{ r: 5 }} />
+                <Line type="monotone" dataKey="cost" stroke="#0f172a" strokeWidth={4} dot={{ r: 5, fill: '#6366f1', stroke: '#0f172a', strokeWidth: 3 }} activeDot={{ r: 8 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Model Distribution */}
-        <div className="bg-brutal-card border-2 border-brutal-border p-4 flex flex-col">
-          <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-2">Model Distribution</h3>
+        <div className="bg-white border-[4px] border-ink shadow-[6px_6px_0_#1A1A2E] rounded-3xl p-6 flex flex-col">
+          <div>
+            <h3 className="text-sm font-black uppercase tracking-widest text-ink border-b-4 border-ink pb-2 mb-6 inline-block">Model Distribution</h3>
+          </div>
           <div className="flex-1 flex items-center justify-center">
             {modelData.length > 0 ? (
               <div className="w-full h-64 relative flex items-center justify-center">
@@ -116,30 +119,32 @@ export default function AnalyticsDashboard() {
                       outerRadius={80}
                       paddingAngle={5}
                       dataKey="value"
+                      stroke="#0f172a"
+                      strokeWidth={3}
                     >
                       {modelData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
                     <RechartsTooltip 
-                      contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }}
-                      itemStyle={{ color: '#fff', fontSize: '12px' }}
+                      contentStyle={{ backgroundColor: '#fff', border: '3px solid #0f172a', borderRadius: '12px', boxShadow: '4px 4px 0 #1A1A2E' }}
+                      itemStyle={{ color: '#0f172a', fontSize: '14px', fontWeight: 'bold' }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
                 {/* Custom Legend */}
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-3">
                   {modelData.map((entry, index) => (
-                    <div key={entry.name} className="flex items-center gap-2 text-xs font-mono">
-                      <div className="w-3 h-3" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                      <span className="text-gray-300">{entry.name}</span>
-                      <span className="font-bold ml-auto">{entry.value}</span>
+                    <div key={entry.name} className="flex items-center gap-3 text-sm bg-cream border-[3px] border-ink shadow-[2px_2px_0_#1A1A2E] px-3 py-1.5 rounded-xl">
+                      <div className="w-3 h-3 rounded-full border-2 border-ink" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                      <span className="font-bold text-ink">{entry.name}</span>
+                      <span className="font-black text-ink ml-2 bg-white px-2 py-0.5 rounded-lg border-2 border-ink">{entry.value}</span>
                     </div>
                   ))}
                 </div>
               </div>
             ) : (
-              <div className="text-gray-500 font-mono text-xs">No model data yet.</div>
+              <div className="text-ink/60 font-bold text-lg border-[3px] border-dashed border-ink/40 rounded-2xl p-8">No model data yet. Start making queries!</div>
             )}
           </div>
         </div>

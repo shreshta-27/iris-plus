@@ -43,7 +43,7 @@ export default function QuizPage() {
     setLoading(true);
     try {
       const res = await api.post('/api/quiz/submit', { attemptId: quiz.id, answers });
-      setResults(res.results);
+      setResults(res);
     } catch (err) {
       setError(err.message || 'Failed to submit quiz');
     } finally {

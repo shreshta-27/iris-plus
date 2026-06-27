@@ -31,7 +31,7 @@ export default function ChatMessage({ message }) {
 
   return (
     <div className={`w-full flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <div className={`max-w-[85%] ${containerClass} ${borderRadiusClass}`}>
+      <div className={`${isUser ? 'max-w-[85%]' : 'w-full max-w-full'} min-w-0 ${containerClass} ${borderRadiusClass}`}>
         
         {/* Avatar */}
         <div className={`w-12 h-12 flex-shrink-0 flex items-center justify-center border-[3px] border-ink rounded-full shadow-[2px_2px_0_#1A1A2E] ${avatarColor}`}>
@@ -55,6 +55,15 @@ export default function ChatMessage({ message }) {
               <ReactMarkdown 
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeHighlight]}
+                components={{
+                  table: ({node, ...props}) => (
+                    <div className="overflow-x-auto w-full my-6 rounded-xl border-[3px] border-ink shadow-[4px_4px_0_#1A1A2E]">
+                      <table className="w-full text-left border-collapse bg-white table-auto break-words" {...props} />
+                    </div>
+                  ),
+                  th: ({node, ...props}) => <th className="p-3 border-b-[3px] border-ink bg-cream font-black text-sm md:text-base whitespace-normal break-words" {...props} />,
+                  td: ({node, ...props}) => <td className="p-3 border-b-2 border-ink/20 text-sm md:text-base whitespace-normal break-words align-top" {...props} />
+                }}
               >
                 {message.content}
               </ReactMarkdown>
