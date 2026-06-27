@@ -1,0 +1,42 @@
+[
+  {
+    "question": "What is IRIS?",
+    "answer": "IRIS (Intelligent Routing & Injection-Safe System) is an AI-powered student assistant that dynamically routes queries to the most appropriate AI model based on complexity, manages a $2 budget with graceful degradation, and protects against prompt injection attacks.",
+    "content": "IRIS intelligent routing injection safe system AI assistant student"
+  },
+  {
+    "question": "How does the model routing work?",
+    "answer": "IRIS classifies every prompt on a 0-100 complexity scale. Simple queries (0-33) go to Kimi K2.6 (~$0.0001/call), medium queries (34-66) go to Claude Haiku 4.5 (~$0.0005/call), and complex queries (67-100) go to Claude Sonnet 4.6 (~$0.006/call). This saves costs while ensuring quality matches complexity.",
+    "content": "model routing classification complexity score simple medium complex Kimi Haiku Sonnet"
+  },
+  {
+    "question": "What is the budget system?",
+    "answer": "IRIS has a $2.00 per-session budget with 4 states: Normal ($0-1.60) uses full routing, Caution ($1.60-1.90) downgrades medium to Kimi, Critical ($1.90-1.99) forces all queries to Kimi, and Exceeded ($2.00+) blocks AI calls entirely with a friendly message.",
+    "content": "budget system degradation normal caution critical exceeded two dollars"
+  },
+  {
+    "question": "How does prompt injection protection work?",
+    "answer": "IRIS uses Otari's PIGuard on every API call. The AI assistant uses 'block' mode (prevents injection, costs $0 if blocked), while the quiz grader uses 'monitor' mode (logs but doesn't block). All attempts are logged in the security dashboard.",
+    "content": "prompt injection protection PIGuard guardrail security block monitor"
+  },
+  {
+    "question": "What courses are available?",
+    "answer": "IRIS supports students across all academic domains. You can ask about computer science, mathematics, physics, chemistry, biology, engineering, humanities, business, and more. The AI adapts its responses based on your question complexity.",
+    "content": "courses available subjects academic computer science math physics engineering"
+  },
+  {
+    "question": "How do I use the quiz feature?",
+    "answer": "Go to the Quiz Forge in your dashboard. Enter a topic or paste your study notes, select difficulty (easy/medium/hard) and number of questions (1-10). IRIS generates adaptive MCQs using AI, then provides personalized feedback on your wrong answers.",
+    "content": "quiz feature generate questions notes topic difficulty study"
+  },
+  {
+    "question": "What is the Career Simulator?",
+    "answer": "The Career Simulator analyzes your skills, resume, or target role and generates 3 personalized career paths with real salary data, required skills, action steps, and difficulty levels. It uses web search for current market data.",
+    "content": "career simulator resume skills salary paths job market"
+  },
+  {
+    "question": "What is Otari?",
+    "answer": "Otari is Mozilla.ai's LLM gateway that provides a unified OpenAI-compatible API to access multiple AI models. It includes built-in features like PIGuard for prompt injection protection and web search capabilities.",
+    "content": "Otari Mozilla AI gateway LLM API models PIGuard"
+  }
+]
