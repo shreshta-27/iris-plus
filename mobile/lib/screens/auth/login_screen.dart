@@ -53,7 +53,11 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacementNamed(context, '/dashboard');
       }
     } on ApiException catch (e) {
-      setState(() => _error = e.message);
+      if (e.statusCode == 403 && e.data != null && e.data!['userId'] != null) {
+        Navigator.pushReplacementNamed(context, '/verify-otp', arguments: e.data!['userId'].toString());
+      } else {
+        setState(() => _error = e.message);
+      }
     } catch (e) {
       setState(() => _error = 'Network error. Please try again.');
     } finally {
