@@ -16,12 +16,14 @@ export default function ChatInput({ onSend, disabled, budgetExceeded }) {
     lastSendRef.current = now;
     setSending(true);
 
+    const textToSend = message.trim();
+    setMessage('');
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
+
     try {
-      await onSend(message.trim());
-      setMessage('');
-      if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
-      }
+      await onSend(textToSend);
     } finally {
       setSending(false);
     }

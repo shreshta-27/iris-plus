@@ -3,7 +3,7 @@ import { useRef, useEffect } from 'react';
 import ChatMessage from './ChatMessage';
 import TypingIndicator from './TypingIndicator';
 
-export default function ChatWindow({ messages, isLoading }) {
+export default function ChatWindow({ messages, isLoading, onSend }) {
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -25,7 +25,11 @@ export default function ChatWindow({ messages, isLoading }) {
               { label: 'Medium', example: '"Explain TCP vs UDP"', tier: 'Haiku 4.5' },
               { label: 'Complex', example: '"Write a REST API"', tier: 'Sonnet 4.6' },
             ].map(item => (
-              <div key={item.label} className="neo-card p-3 text-left">
+              <div 
+                key={item.label} 
+                className="neo-card p-3 text-left cursor-pointer hover:bg-brutal-hover transition-colors"
+                onClick={() => onSend && onSend(item.example.replace(/"/g, ''))}
+              >
                 <p className="text-[10px] font-bold uppercase text-gray-500 mb-1">{item.label}</p>
                 <p className="text-xs text-gray-300 mb-2">{item.example}</p>
                 <p className="text-[10px] font-mono text-iris-400">→ {item.tier}</p>

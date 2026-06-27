@@ -13,6 +13,21 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionData, setSessionData] = useState(null);
 
+  // Load state from sessionStorage on mount
+  useEffect(() => {
+    const savedMsgs = sessionStorage.getItem('iris_chat_messages');
+    if (savedMsgs) {
+      try { setMessages(JSON.parse(savedMsgs)); } catch (e) {}
+    }
+  }, []);
+
+  // Save state to sessionStorage on change
+  useEffect(() => {
+    if (messages.length > 0) {
+      sessionStorage.setItem('iris_chat_messages', JSON.stringify(messages));
+    }
+  }, [messages]);
+
   // Hardcoded session for demo/hackathon purposes, should match backend assumption
   const sessionId = 'demo-session-id';
   const { socket, routingEvents, isConnected } = useSocket(sessionId);
@@ -20,11 +35,15 @@ export default function DashboardPage() {
 
   const handleSend = async (text) => {
     const newMessage = { role: 'user', content: text, id: Date.now() };
+    
+    // Extract recent history for AI context (excluding specific UI fields like id, model, tier)
+    const chatHistory = messages.slice(-10).map(m => ({ role: m.role, content: m.content }));
+    
     setMessages(prev => [...prev, newMessage]);
     setIsLoading(true);
 
     try {
-      const res = await api.post('/api/ai/chat', { message: text, sessionId });
+      const res = await api.post('/api/ai/chat', { message: text, sessionId, chatHistory });
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: res.answer,
@@ -60,7 +79,7 @@ export default function DashboardPage() {
         {stats && (
           <BudgetWarningBanner mode={stats.budgetState} />
         )}
-        <ChatWindow messages={messages} isLoading={isLoading} />
+        <ChatWindow messages={messages} isLoading={isLoading} onSend={handleSend} />
         <ChatInput 
           onSend={handleSend} 
           disabled={!isConnected} 
