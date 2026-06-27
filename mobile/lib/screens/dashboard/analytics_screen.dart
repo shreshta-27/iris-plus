@@ -159,28 +159,31 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title.toUpperCase(),
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 2,
-                  color: IrisColors.ink.withValues(alpha: 0.6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title.toUpperCase(),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
+                    color: IrisColors.ink.withValues(alpha: 0.6),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                value,
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w900,
-                  color: IrisColors.ink,
+                const SizedBox(height: 8),
+                Text(
+                  value,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w900,
+                    color: IrisColors.ink,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           Container(
             width: 56,

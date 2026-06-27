@@ -74,19 +74,23 @@ class LiveRoutingFeed extends StatelessWidget {
             height: 4,
             color: IrisColors.ink,
           ),
-          SizedBox(
-            height: 120,
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 150),
             child: events.isEmpty
                 ? Center(
-                    child: Text(
-                      'Waiting for routing events...',
-                      style: GoogleFonts.jetBrainsMono(
-                        fontSize: 12,
-                        color: IrisColors.ink.withValues(alpha: 0.5),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        'Waiting for routing events...',
+                        style: GoogleFonts.jetBrainsMono(
+                          fontSize: 12,
+                          color: IrisColors.ink.withValues(alpha: 0.5),
+                        ),
                       ),
                     ),
                   )
                 : ListView.builder(
+                    shrinkWrap: true,
                     padding: const EdgeInsets.all(8),
                     itemCount: events.length,
                     itemBuilder: (context, index) {

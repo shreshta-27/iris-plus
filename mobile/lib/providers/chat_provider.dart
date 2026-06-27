@@ -59,7 +59,7 @@ class ChatProvider extends ChangeNotifier {
         tier: res['routing']?['tier']?.toString(),
         model: res['routing']?['modelDisplayName']?.toString(),
         routing: res['routing'] is Map<String, dynamic> ? res['routing'] : null,
-        cost: (res['cost'] ?? 0).toDouble(),
+        cost: ((res['cost'] is Map ? res['cost']['thisCall'] : res['cost']) ?? 0).toDouble(),
         injectionStatus: res['injectionStatus']?.toString(),
       );
       _messages.add(aiMsg);

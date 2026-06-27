@@ -24,12 +24,19 @@ void main() {
       expect(loginButtonFinder, findsWidgets);
 
       // We can interact with the app:
-      // await tester.enterText(emailFinder, 'test@example.com');
-      // await tester.enterText(passwordFinder, 'password');
-      // await tester.tap(loginButtonFinder.first);
-      // await tester.pumpAndSettle();
+      await tester.enterText(emailFinder, 'ganeshhanuman77@gamiul.com');
+      await tester.pump();
+      await tester.enterText(passwordFinder, '9082249120');
+      await tester.pump();
       
-      // Check that it's actually running and loaded the UI
+      await tester.tap(loginButtonFinder.first);
+      
+      // Wait for the login request to finish and navigation to occur
+      await tester.pumpAndSettle(const Duration(seconds: 5));
+      
+      // We should be on the dashboard or OTP screen.
+      // Let's verify if we transitioned by checking if login button is gone or OTP/Dashboard is visible
+      expect(loginButtonFinder, findsNothing);
     });
   });
 }

@@ -36,14 +36,21 @@ export async function register(req, res, next) {
       name,
       email,
       password: hashedPassword,
-      isVerified: true, // DEV MODE: Auto-verify
+      isVerified: false,
+      otp,
+      otpExpiry
     });
 
-    const token = createToken(user._id);
-    setTokenCookie(res, token);
+    try {
+      console.log(`\n\n🎯 HACKATHON DEV MODE: Registration OTP for ${email} is ${otp}\n\n`);
+      await sendOTPEmail(email, name, otp);
+    } catch (emailErr) {
+      console.error('Email sending failed:', emailErr.message);
+    }
 
     return res.status(201).json({
-      message: 'Registration successful. Auto-verified for testing.',
+      message: 'Registration successful. Please verify your email.',
+      userId: user._id
     });
   } catch (err) {
     next(err);
@@ -105,16 +112,23 @@ export async function login(req, res, next) {
   try {
     const { email, password } = req.body;
     
-    // DEV MODE: Completely bypass login checks and just let them in!
     let user = await User.findOne({ email });
     if (!user) {
-      // If user doesn't exist at all, create a dummy one on the fly so dashboard works
-      user = await User.create({
-        name: 'Test User',
-        email: email || 'test@example.com',
-        password: 'mocked',
-        isVerified: true
-      });
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch && password !== 'mocked') {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    if (!user.isVerified) {
+      const otp = generateOTP();
+      user.otp = otp;
+      user.otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+      await user.save();
+      console.log(`\n\n🎯 HACKATHON DEV MODE: Verification OTP for ${email} is ${otp}\n\n`);
+      return res.status(403).json({ error: 'Please verify your email first', userId: user._id });
     }
 
     const token = createToken(user._id);

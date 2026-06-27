@@ -178,8 +178,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 top: BorderSide(color: IrisColors.ink.withValues(alpha: 0.1), width: 2),
                               ),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                            child: Wrap(
+                              alignment: WrapAlignment.center,
                               children: [
                                 Text('Already have an account? ',
                                     style: GoogleFonts.spaceGrotesk(

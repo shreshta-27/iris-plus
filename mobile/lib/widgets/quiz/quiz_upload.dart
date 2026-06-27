@@ -198,56 +198,53 @@ class _QuizUploadState extends State<QuizUpload> {
                 ),
               ),
             const SizedBox(height: 24),
-            Row(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'DIFFICULTY',
-                        style: GoogleFonts.spaceGrotesk(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 2,
-                          color: IrisColors.ink,
-                        ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'DIFFICULTY',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 2,
+                        color: IrisColors.ink,
                       ),
-                      const SizedBox(height: 12),
-                      _buildDropdown(
-                        value: _difficulty,
-                        items: const [
-                          DropdownMenuItem(value: 'easy', child: Text('🟢 Easy')),
-                          DropdownMenuItem(value: 'medium', child: Text('🟡 Medium')),
-                          DropdownMenuItem(value: 'hard', child: Text('🔴 Hard')),
-                        ],
-                        onChanged: (v) => setState(() => _difficulty = v as String),
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildDropdown(
+                      value: _difficulty,
+                      items: const [
+                        DropdownMenuItem(value: 'easy', child: Text('🟢 Easy')),
+                        DropdownMenuItem(value: 'medium', child: Text('🟡 Medium')),
+                        DropdownMenuItem(value: 'hard', child: Text('🔴 Hard')),
+                      ],
+                      onChanged: (v) => setState(() => _difficulty = v as String),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'QUESTIONS',
-                        style: GoogleFonts.spaceGrotesk(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 2,
-                          color: IrisColors.ink,
-                        ),
+                const SizedBox(height: 24),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'QUESTIONS',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 2,
+                        color: IrisColors.ink,
                       ),
-                      const SizedBox(height: 12),
-                      _buildDropdown(
-                        value: _numQuestions,
-                        items: [3, 5, 7, 10].map((n) => DropdownMenuItem(value: n, child: Text('$n Questions'))).toList(),
-                        onChanged: (v) => setState(() => _numQuestions = v as int),
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildDropdown(
+                      value: _numQuestions,
+                      items: [3, 5, 7, 10].map((n) => DropdownMenuItem(value: n, child: Text('$n Questions'))).toList(),
+                      onChanged: (v) => setState(() => _numQuestions = v as int),
+                    ),
+                  ],
                 ),
               ],
             ),

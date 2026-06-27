@@ -7,6 +7,7 @@ import '../../providers/budget_provider.dart';
 import '../../widgets/budget_meter.dart';
 import 'dashboard_shell.dart';
 import 'chat_screen.dart';
+import 'avatar_screen.dart';
 import 'quiz_screen.dart';
 import 'career_screen.dart';
 import 'analytics_screen.dart';
@@ -25,6 +26,7 @@ class _DashboardLayoutState extends State<DashboardLayout> {
 
   final List<Widget> _screens = [
     const ChatScreen(),
+    const AvatarScreen(),
     const QuizScreen(),
     const CareerScreen(),
     const AnalyticsScreen(),
