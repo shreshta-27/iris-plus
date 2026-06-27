@@ -8,18 +8,24 @@ export async function callOtari({
   useWebSearch = false,
   sessionId,
 }) {
+  // The Otari proxy crashes (502) if it receives consecutive user roles or max_tokens.
+  // We merge the system prompt directly into the final user message to bypass this limitation.
+  let formattedMessages = [...messages];
+  if (systemPrompt && formattedMessages.length > 0) {
+    const lastMsgIdx = formattedMessages.length - 1;
+    formattedMessages[lastMsgIdx] = {
+      ...formattedMessages[lastMsgIdx],
+      content: `[SYSTEM: ${systemPrompt}]\n\n${formattedMessages[lastMsgIdx].content}`
+    };
+  }
+
   const requestBody = {
     model,
-    messages: systemPrompt
-      ? [{ role: 'system', content: systemPrompt }, ...messages]
-      : messages,
-    max_tokens: 1024,
+    messages: formattedMessages,
     guardrails: [{ profile: 'prompt-injection', mode: guardrailMode }],
   };
 
-  if (useWebSearch) {
-    requestBody.tools = [{ type: 'otari_web_search' }];
-  }
+  // Tools parameter removed because Otari API returns 403 Forbidden when it is included
 
   const response = await otariClient.chat.completions.create(requestBody);
 

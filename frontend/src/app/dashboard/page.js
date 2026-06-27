@@ -27,10 +27,10 @@ export default function DashboardPage() {
       const res = await api.post('/api/ai/chat', { message: text, sessionId });
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: res.message,
+        content: res.answer,
         id: Date.now() + 1,
-        tier: res.debug?.tier,
-        model: res.debug?.modelDisplayName,
+        tier: res.routing?.tier,
+        model: res.routing?.modelDisplayName,
       }]);
       fetchStats();
     } catch (err) {
