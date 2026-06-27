@@ -53,59 +53,56 @@ export default function RegisterPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Name</label>
-              <div className="relative">
-                <RiUserLine className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-                  required
-                  className="w-full bg-brutal-black border-2 border-brutal-border text-white pl-10 p-3 outline-none focus:border-iris-500 transition-colors"
-                  placeholder="John Doe"
-                />
-              </div>
+              <label className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                <RiUserLine className="w-4 h-4" /> Name
+              </label>
+              <input
+                type="text"
+                value={form.name}
+                onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+                required
+                className="w-full bg-brutal-black border-2 border-brutal-border text-white p-4 outline-none focus:border-iris-500 transition-colors text-lg"
+                placeholder="John Doe"
+              />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Email</label>
-              <div className="relative">
-                <RiMailLine className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
-                  required
-                  className="w-full bg-brutal-black border-2 border-brutal-border text-white pl-10 p-3 outline-none focus:border-iris-500 transition-colors"
-                  placeholder="student@university.edu"
-                />
-              </div>
+              <label className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                <RiMailLine className="w-4 h-4" /> Email
+              </label>
+              <input
+                type="email"
+                value={form.email}
+                onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+                required
+                className="w-full bg-brutal-black border-2 border-brutal-border text-white p-4 outline-none focus:border-iris-500 transition-colors text-lg"
+                placeholder="student@university.edu"
+              />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Password</label>
-              <div className="relative">
-                <RiLockLine className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
-                <input
-                  type="password"
-                  value={form.password}
-                  onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
-                  required
-                  className="w-full bg-brutal-black border-2 border-brutal-border text-white pl-10 p-3 outline-none focus:border-iris-500 transition-colors"
-                  placeholder="••••••••"
-                />
-              </div>
+              <label className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                <RiLockLine className="w-4 h-4" /> Password
+              </label>
+              <input
+                type="password"
+                value={form.password}
+                onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
+                required
+                className="w-full bg-brutal-black border-2 border-brutal-border text-white p-4 outline-none focus:border-iris-500 transition-colors text-lg"
+                placeholder="••••••••"
+              />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-iris-600 hover:bg-iris-500 text-white font-bold p-3 mt-4 border-2 border-iris-600 flex items-center justify-center gap-2 transition-all hover:-translate-y-1 hover:shadow-brutal"
+              className="w-full bg-iris-600 hover:bg-iris-500 text-white font-bold py-4 mt-2 border-2 border-iris-600 flex items-center justify-center gap-2 transition-all hover:-translate-y-1 hover:shadow-brutal text-lg"
             >
-              {loading ? <RiLoader4Line className="animate-spin w-5 h-5" /> : (
-                <>Sign Up <RiArrowRightLine /></>
+              {loading ? <RiLoader4Line className="animate-spin w-6 h-6" /> : (
+                <>Sign Up <RiArrowRightLine className="w-5 h-5" /></>
               )}
             </button>
           </form>

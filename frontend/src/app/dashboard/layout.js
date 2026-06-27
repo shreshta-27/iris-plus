@@ -10,7 +10,7 @@ export default function DashboardLayout({ children }) {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { stats, fetchStats } = useBudget('demo-session-id'); // use fixed session for demo
+  const { budget: stats, fetchBudget: fetchStats } = useBudget('demo-session-id'); // use fixed session for demo
 
   useEffect(() => {
     api.get('/api/auth/me')
@@ -18,7 +18,8 @@ export default function DashboardLayout({ children }) {
         setUser(data.user);
         fetchStats();
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error('Auth check failed:', err);
         router.push('/login');
       })
       .finally(() => setLoading(false));

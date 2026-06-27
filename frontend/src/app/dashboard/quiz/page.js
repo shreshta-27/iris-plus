@@ -16,7 +16,7 @@ export default function QuizPage() {
 
   const sessionId = 'demo-session-id';
   const { routingEvents, isConnected } = useSocket(sessionId);
-  const { stats, fetchStats } = useBudget(sessionId);
+  const { budget: stats, fetchBudget: fetchStats } = useBudget(sessionId);
 
   const handleGenerate = async (params) => {
     setLoading(true);

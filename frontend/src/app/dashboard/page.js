@@ -16,7 +16,7 @@ export default function DashboardPage() {
   // Hardcoded session for demo/hackathon purposes, should match backend assumption
   const sessionId = 'demo-session-id';
   const { socket, routingEvents, isConnected } = useSocket(sessionId);
-  const { stats, fetchStats } = useBudget(sessionId);
+  const { budget: stats, fetchBudget: fetchStats } = useBudget(sessionId);
 
   const handleSend = async (text) => {
     const newMessage = { role: 'user', content: text, id: Date.now() };

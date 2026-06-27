@@ -26,5 +26,6 @@ export async function sendOTPEmail(email, name, otp) {
         <p style="color: #525252; font-size: 11px;">If you didn't request this, ignore this email.</p>
       </div>
     `,
+    text: `Hi ${name},\n\nYour IRIS verification code is: ${otp}\n\nValid for 10 minutes. Do not share this code.`,
   });
 }

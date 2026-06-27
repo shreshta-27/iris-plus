@@ -14,7 +14,7 @@ export default function CareerPage() {
 
   const sessionId = 'demo-session-id';
   const { routingEvents, isConnected } = useSocket(sessionId);
-  const { fetchStats } = useBudget(sessionId);
+  const { budget, fetchBudget } = useBudget(sessionId);
 
   const handleAnalyze = async (data) => {
     setLoading(true);
@@ -23,7 +23,7 @@ export default function CareerPage() {
     try {
       const res = await api.post('/api/career/analyze', { ...data, sessionId });
       setReport(res.paths);
-      fetchStats();
+      fetchBudget();
     } catch (err) {
       if (err.data?.injectionDetected) {
         setError('PIGuard blocked analysis: Potential prompt injection detected.');

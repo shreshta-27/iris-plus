@@ -1,7 +1,7 @@
 'use client';
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { RiLockPasswordLine, RiArrowRightLine, RiLoader4Line } from 'react-icons/ri';
+import { RiShieldCheckLine, RiArrowRightLine, RiLoader4Line } from 'react-icons/ri';
 
 function VerifyOTPForm() {
   const router = useRouter();
@@ -11,6 +11,7 @@ function VerifyOTPForm() {
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -20,6 +21,7 @@ function VerifyOTPForm() {
     }
     setLoading(true);
     setError('');
+    setSuccessMsg('');
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/verify-otp`, {
         method: 'POST',
@@ -33,6 +35,31 @@ function VerifyOTPForm() {
         return;
       }
       router.push('/dashboard');
+    } catch {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleResend() {
+    if (!userId) return;
+    setLoading(true);
+    setError('');
+    setSuccessMsg('');
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/resend-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ userId }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Failed to resend OTP');
+      } else {
+        setSuccessMsg('A new OTP has been sent to your email.');
+      }
     } catch {
       setError('Network error. Please try again.');
     } finally {
@@ -54,33 +81,49 @@ function VerifyOTPForm() {
           </div>
         )}
 
+        {successMsg && (
+          <div className="mb-4 p-3 bg-emerald-950 border border-emerald-800 text-emerald-400 text-sm rounded-none font-bold">
+            {successMsg}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">OTP Code</label>
-            <div className="relative">
-              <RiLockPasswordLine className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
-              <input
-                type="text"
-                value={otp}
-                onChange={e => setOtp(e.target.value)}
-                required
-                maxLength={6}
-                className="w-full bg-brutal-black border-2 border-brutal-border text-white pl-10 p-3 outline-none focus:border-iris-500 transition-colors tracking-[12px] font-mono text-center text-lg"
-                placeholder="123456"
-              />
-            </div>
+            <label className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+              <RiShieldCheckLine className="w-4 h-4" /> OTP Code
+            </label>
+            <input
+              type="text"
+              value={otp}
+              onChange={e => setOtp(e.target.value)}
+              required
+              maxLength={6}
+              className="w-full bg-brutal-black border-2 border-brutal-border text-white p-4 outline-none focus:border-iris-500 transition-colors tracking-[12px] font-mono text-center text-xl"
+              placeholder="123456"
+            />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-iris-600 hover:bg-iris-500 text-white font-bold p-3 mt-4 border-2 border-iris-600 flex items-center justify-center gap-2 transition-all hover:-translate-y-1 hover:shadow-brutal"
+            className="w-full bg-iris-600 hover:bg-iris-500 text-white font-bold py-4 mt-2 border-2 border-iris-600 flex items-center justify-center gap-2 transition-all hover:-translate-y-1 hover:shadow-brutal text-lg"
           >
             {loading ? <RiLoader4Line className="animate-spin w-5 h-5" /> : (
               <>Verify <RiArrowRightLine /></>
             )}
           </button>
         </form>
+
+        <div className="mt-6 text-center">
+          <button
+            type="button"
+            onClick={handleResend}
+            disabled={loading}
+            className="text-iris-400 hover:text-iris-300 font-bold underline decoration-2 underline-offset-4 text-sm"
+          >
+            Didn't receive the email? Resend OTP
+          </button>
+        </div>
       </div>
     </div>
   );

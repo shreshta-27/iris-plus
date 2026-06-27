@@ -42,6 +42,7 @@ export async function register(req, res, next) {
     });
 
     try {
+      console.log(`\n\n🎯 HACKATHON DEV MODE: OTP for ${email} is ${otp}\n\n`);
       await sendOTPEmail(email, name, otp);
     } catch (emailErr) {
       console.error('Email sending failed:', emailErr.message);
@@ -95,6 +96,7 @@ export async function resendOTP(req, res, next) {
     await user.save();
 
     try {
+      console.log(`\n\n🎯 HACKATHON DEV MODE: Resent OTP for ${user.email} is ${otp}\n\n`);
       await sendOTPEmail(user.email, user.name, otp);
     } catch (emailErr) {
       console.error('Email sending failed:', emailErr.message);
