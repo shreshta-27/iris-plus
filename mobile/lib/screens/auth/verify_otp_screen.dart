@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 import '../../core/api_service.dart';
 import '../../providers/auth_provider.dart';
@@ -87,7 +88,8 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
                   color: IrisColors.sunny,
                   border: Border.all(color: IrisColors.ink, width: 3),
                 ),
-              ),
+              ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+               .moveY(begin: 5, end: -5, duration: 1800.ms, curve: Curves.easeInOut),
             ),
             Positioned(
               bottom: MediaQuery.of(context).size.height * 0.25,
@@ -100,7 +102,8 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
                   shape: BoxShape.circle,
                   border: Border.all(color: IrisColors.ink, width: 3),
                 ),
-              ),
+              ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+               .moveY(begin: -5, end: 5, duration: 2200.ms, curve: Curves.easeInOut),
             ),
             Center(
               child: SingleChildScrollView(
@@ -146,7 +149,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
                               textAlign: TextAlign.center,
                               style: GoogleFonts.spaceGrotesk(
                                   fontWeight: FontWeight.w700, fontSize: 13, color: IrisColors.coral)),
-                        ),
+                        ).animate().fadeIn().shake(),
                       if (_successMsg.isNotEmpty)
                         Container(
                           width: double.infinity,
@@ -161,7 +164,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
                               textAlign: TextAlign.center,
                               style: GoogleFonts.spaceGrotesk(
                                   fontWeight: FontWeight.w700, fontSize: 13, color: IrisColors.ink)),
-                        ),
+                        ).animate().fadeIn().shake(),
                       NeoInput(
                         controller: _otpCtrl,
                         label: 'Code',
@@ -171,7 +174,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
                         textAlign: TextAlign.center,
                         fontSize: 28,
                         letterSpacing: 12,
-                      ),
+                      ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
                       const SizedBox(height: 24),
                       SizedBox(
                         width: double.infinity,
@@ -181,7 +184,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
                           isLoading: _loading,
                           onPressed: _loading ? null : _handleSubmit,
                         ),
-                      ),
+                      ).animate().fadeIn(delay: 300.ms).scale(begin: const Offset(0.9, 0.9)),
                       const SizedBox(height: 24),
                       Container(
                         padding: const EdgeInsets.only(top: 20),
@@ -203,11 +206,11 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
                             ),
                           ),
                         ),
-                      ),
+                      ).animate().fadeIn(delay: 400.ms),
                     ],
                   ),
                 ),
-              ),
+              ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05),
             ),
           ],
         ),
