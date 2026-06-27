@@ -8,15 +8,15 @@ export const MODEL_DISPLAY_NAMES = {
 };
 
 export const TIER_COLORS = {
-  simple: { bg: 'bg-emerald-500/15', text: 'text-emerald-400', border: 'border-emerald-500/30' },
-  medium: { bg: 'bg-amber-500/15', text: 'text-amber-400', border: 'border-amber-500/30' },
-  complex: { bg: 'bg-rose-500/15', text: 'text-rose-400', border: 'border-rose-500/30' },
-  cached: { bg: 'bg-blue-500/15', text: 'text-blue-400', border: 'border-blue-500/30' },
+  simple: { bg: 'bg-mint/20', text: 'text-ink', border: 'border-ink' },
+  medium: { bg: 'bg-sunny/30', text: 'text-ink', border: 'border-ink' },
+  complex: { bg: 'bg-coral/20', text: 'text-ink', border: 'border-ink' },
+  cached: { bg: 'bg-sky/20', text: 'text-ink', border: 'border-ink' },
 };
 
 export const BUDGET_MODES = {
-  normal: { color: 'text-emerald-400', bg: 'bg-emerald-500', label: 'Normal' },
-  caution: { color: 'text-amber-400', bg: 'bg-amber-500', label: 'Caution' },
-  critical: { color: 'text-red-400', bg: 'bg-red-500', label: 'Critical' },
+  normal: { color: 'text-mint', bg: 'bg-mint', label: 'Normal' },
+  caution: { color: 'text-sunny', bg: 'bg-sunny', label: 'Caution' },
+  critical: { color: 'text-coral', bg: 'bg-coral', label: 'Critical' },
   exceeded: { color: 'text-red-600', bg: 'bg-red-600', label: 'Exceeded' },
 };
