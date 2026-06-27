@@ -56,6 +56,24 @@ export async function handleAIChat(req, res, next) {
       ? `Budget ${budgetMode} — downgraded from ${MODEL_DISPLAY_NAMES[baseModel]} to ${MODEL_DISPLAY_NAMES[selectedModel]}`
       : null;
 
+    const injectionKeywords = ['ignore all', 'ignore previous', 'jailbreak', 'system prompt', 'developer mode', 'bypass', 'override'];
+    const isInjection = injectionKeywords.some(keyword => message.toLowerCase().includes(keyword));
+    
+    if (isInjection) {
+      recordBlockedCall(sessionId);
+      emitRoutingEvent(sessionId, {
+        type: 'injection_blocked',
+        message: message.substring(0, 50) + '...',
+        timestamp: new Date().toISOString(),
+      });
+      return res.status(400).json({
+        error: 'prompt_injection_detected',
+        message: 'Your message was flagged as a potential prompt injection attempt and blocked for security.',
+        injectionStatus: 'blocked',
+        cost: { thisCall: 0, ...getAllBudgetStats(sessionId) },
+      });
+    }
+
     let injectionStatus = 'clean';
     let otariResult;
 

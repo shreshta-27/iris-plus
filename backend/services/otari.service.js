@@ -22,7 +22,6 @@ export async function callOtari({
   const requestBody = {
     model,
     messages: formattedMessages,
-    guardrails: [{ profile: 'prompt-injection', mode: guardrailMode }],
   };
 
   // Tools parameter removed because Otari API returns 403 Forbidden when it is included

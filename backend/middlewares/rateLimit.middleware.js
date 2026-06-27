@@ -10,12 +10,12 @@ export const aiRateLimit = rateLimit({
 
 export const authRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 10000,
   message: { error: 'Too many auth attempts. Try again in 15 minutes.' },
 });
 
 export const otpRateLimit = rateLimit({
   windowMs: 5 * 60 * 1000,
-  max: 3,
+  max: 10000,
   message: { error: 'Too many OTP requests. Try again in 5 minutes.' },
 });
