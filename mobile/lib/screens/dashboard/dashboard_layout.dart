@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/budget_provider.dart';
@@ -75,7 +76,7 @@ class _DashboardLayoutState extends State<DashboardLayout> {
       onTabTapped: _onTabTapped,
       child: Column(
         children: [
-          _buildHeader(),
+          _buildHeader().animate().slideY(begin: -1, duration: 400.ms, curve: Curves.easeOutQuad),
           Expanded(child: _screens[_currentIndex]),
         ],
       ),
@@ -98,46 +99,53 @@ class _DashboardLayoutState extends State<DashboardLayout> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: IrisColors.white,
-                  border: Border.all(color: IrisColors.ink, width: 3),
-                  borderRadius: IrisRadius.medium,
-                  boxShadow: IrisShadows.neo(x: 2, y: 2),
-                ),
-                child: const Center(
-                  child: Text('✦', style: TextStyle(color: IrisColors.irisPurple, fontSize: 20)),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'IRIS Plus',
-                    style: const TextStyle(
-                      fontFamily: 'SpaceGrotesk',
-                      fontWeight: FontWeight.w900,
-                      fontSize: 18,
-                      color: IrisColors.ink,
-                    ),
+          Expanded(
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: IrisColors.white,
+                    border: Border.all(color: IrisColors.ink, width: 3),
+                    borderRadius: IrisRadius.medium,
+                    boxShadow: IrisShadows.neo(x: 2, y: 2),
                   ),
-                  Text(
-                    auth.user?['name'] ?? 'User',
-                    style: TextStyle(
-                      fontFamily: 'SpaceGrotesk',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12,
-                      color: IrisColors.ink.withValues(alpha: 0.6),
-                    ),
+                  child: const Center(
+                    child: Text('✦', style: TextStyle(color: IrisColors.irisPurple, fontSize: 20)),
                   ),
-                ],
-              ),
-            ],
+                ).animate(onPlay: (controller) => controller.repeat())
+                 .shimmer(duration: 2000.ms, color: IrisColors.irisPurple.withValues(alpha: 0.3)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'IRIS Plus',
+                        style: TextStyle(
+                          fontFamily: 'SpaceGrotesk',
+                          fontWeight: FontWeight.w900,
+                          fontSize: 18,
+                          color: IrisColors.ink,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        auth.user?['name'] ?? 'User',
+                        style: TextStyle(
+                          fontFamily: 'SpaceGrotesk',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                          color: IrisColors.ink.withValues(alpha: 0.6),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
           SizedBox(
             width: 120,

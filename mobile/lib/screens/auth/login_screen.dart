@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 import '../../core/api_service.dart';
 import '../../providers/auth_provider.dart';
@@ -86,7 +87,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   shape: BoxShape.circle,
                   border: Border.all(color: IrisColors.ink, width: 3),
                 ),
-              ),
+              ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+               .moveY(begin: -5, end: 5, duration: 2000.ms, curve: Curves.easeInOut),
             ),
             Positioned(
               bottom: 80,
@@ -101,7 +103,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     border: Border.all(color: IrisColors.ink, width: 3),
                   ),
                 ),
-              ),
+              ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+               .moveY(begin: 5, end: -5, duration: 1500.ms, curve: Curves.easeInOut),
             ),
             Center(
               child: SingleChildScrollView(
@@ -120,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Text('IRIS ',
                                 style: GoogleFonts.spaceGrotesk(
                                     fontSize: 28, fontWeight: FontWeight.w900, color: IrisColors.ink)),
-                            Text('✦',
+                            const Text('✦',
                                 style: TextStyle(fontSize: 28, color: IrisColors.irisPurple)),
                           ],
                         ),
@@ -157,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               textAlign: TextAlign.center,
                               style: GoogleFonts.spaceGrotesk(
                                   fontWeight: FontWeight.w700, fontSize: 13, color: IrisColors.coral)),
-                        ),
+                        ).animate().fadeIn().shake(),
                       if (_success.isNotEmpty)
                         Container(
                           width: double.infinity,
@@ -172,7 +175,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               textAlign: TextAlign.center,
                               style: GoogleFonts.spaceGrotesk(
                                   fontWeight: FontWeight.w700, fontSize: 13, color: IrisColors.ink)),
-                        ),
+                        ).animate().fadeIn(),
                       if (_mode == 'password' || _mode == 'otp_request') ...[
                         NeoInput(
                           controller: _emailCtrl,
@@ -180,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           prefixIcon: Icons.email_outlined,
                           placeholder: 'student@university.edu',
                           keyboardType: TextInputType.emailAddress,
-                        ),
+                        ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
                         const SizedBox(height: 16),
                       ],
                       if (_mode == 'password') ...[
@@ -190,7 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           prefixIcon: Icons.lock_outline,
                           placeholder: '••••••••',
                           obscureText: true,
-                        ),
+                        ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
                         const SizedBox(height: 8),
                         Align(
                           alignment: Alignment.centerLeft,
@@ -211,7 +214,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           ),
-                        ),
+                        ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1),
                         const SizedBox(height: 16),
                       ],
                       if (_mode == 'otp_verify') ...[
@@ -225,7 +228,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           textAlign: TextAlign.center,
                           fontSize: 20,
                           letterSpacing: 12,
-                        ),
+                        ).animate().fadeIn().slideY(begin: 0.1),
                         const SizedBox(height: 16),
                       ],
                       SizedBox(
@@ -240,7 +243,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           isLoading: _loading,
                           onPressed: _loading ? null : _handleSubmit,
                         ),
-                      ),
+                      ).animate().fadeIn(delay: 500.ms).scale(begin: const Offset(0.9, 0.9)),
                       if (_mode != 'password') ...[
                         const SizedBox(height: 12),
                         GestureDetector(
@@ -259,7 +262,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               decorationThickness: 2,
                             ),
                           ),
-                        ),
+                        ).animate().fadeIn().slideY(begin: 0.1),
                       ],
                       const SizedBox(height: 24),
                       Container(
@@ -287,12 +290,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ],
                         ),
-                      ),
+                      ).animate().fadeIn(delay: 600.ms),
                     ],
                   ),
                 ),
               ),
-            ),
+            ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05),
           ],
         ),
       ),

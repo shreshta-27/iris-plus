@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:flutter/foundation.dart';
 import 'constants.dart';
 
 class ApiService {
@@ -16,11 +17,15 @@ class ApiService {
       baseUrl: apiUrl,
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
+      extra: const {'withCredentials': true},
       headers: {
         'Content-Type': 'application/json',
       },
     ));
-    _dio.interceptors.add(CookieManager(_cookieJar));
+    
+    if (!kIsWeb) {
+      _dio.interceptors.add(CookieManager(_cookieJar));
+    }
   }
 
   Dio get dio => _dio;

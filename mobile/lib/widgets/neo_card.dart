@@ -29,26 +29,37 @@ class NeoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Flutter throws if BorderRadius is used with non-uniform Borders.
+    // To achieve the Neo-Brutalist accent borders (top/left) with rounded corners,
+    // we use a uniform outer border and an inner border for the accents, clipped to fit.
+    final radius = borderRadius ?? IrisRadius.extraLarge;
+    
     return Container(
-      padding: padding ?? const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: backgroundColor ?? IrisColors.white,
-        borderRadius: borderRadius ?? IrisRadius.extraLarge,
-        border: Border(
-          top: BorderSide(
-            color: topBorderColor ?? IrisColors.ink,
-            width: topBorderColor != null ? topBorderWidth : borderWidth,
-          ),
-          left: BorderSide(
-            color: leftBorderColor ?? IrisColors.ink,
-            width: leftBorderColor != null ? leftBorderWidth : borderWidth,
-          ),
-          right: BorderSide(color: IrisColors.ink, width: borderWidth),
-          bottom: BorderSide(color: IrisColors.ink, width: borderWidth),
-        ),
+        color: IrisColors.white, // Outer background
+        borderRadius: radius,
+        border: Border.all(color: IrisColors.ink, width: borderWidth),
         boxShadow: boxShadow ?? IrisShadows.large(),
       ),
-      child: child,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(
+            (radius.topLeft.x > borderWidth) ? radius.topLeft.x - borderWidth : 0),
+        child: Container(
+          padding: padding ?? const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: backgroundColor ?? IrisColors.white,
+            border: Border(
+              top: topBorderColor != null 
+                  ? BorderSide(color: topBorderColor!, width: topBorderWidth - borderWidth) 
+                  : BorderSide.none,
+              left: leftBorderColor != null 
+                  ? BorderSide(color: leftBorderColor!, width: leftBorderWidth - borderWidth) 
+                  : BorderSide.none,
+            ),
+          ),
+          child: child,
+        ),
+      ),
     );
   }
 }

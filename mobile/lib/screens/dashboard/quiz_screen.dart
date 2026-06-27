@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/quiz_provider.dart';
@@ -49,7 +50,7 @@ class QuizScreen extends StatelessWidget {
             child: QuizResults(
               results: quiz.results!,
               onRetry: () => quiz.reset(),
-            ),
+            ).animate().fadeIn().slideY(begin: 0.05),
           );
         }
 
@@ -59,7 +60,7 @@ class QuizScreen extends StatelessWidget {
               questions: quiz.questions!,
               onSubmit: (answers) => quiz.submitQuiz(answers),
               loading: quiz.isLoading,
-            ),
+            ).animate().fadeIn().slideX(begin: 0.1),
           );
         }
 
@@ -75,7 +76,7 @@ class QuizScreen extends StatelessWidget {
               numQuestions: numQuestions,
             );
           },
-        );
+        ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05);
       },
     );
   }

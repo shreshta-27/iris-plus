@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/career_provider.dart';
@@ -58,17 +59,17 @@ class CareerScreen extends StatelessWidget {
                         fontWeight: FontWeight.w900,
                         color: IrisColors.ink,
                       ),
-                    ),
+                    ).animate().fadeIn().slideX(begin: -0.1),
                     IconButton(
                       onPressed: () => career.reset(),
                       icon: const Icon(Icons.refresh, color: IrisColors.ink),
                       tooltip: 'New Analysis',
-                    ),
+                    ).animate().fadeIn().scaleXY(begin: 0.8),
                   ],
                 ),
               ),
               Expanded(
-                child: CareerPath(report: career.paths!),
+                child: CareerPath(report: career.paths!).animate().fadeIn().slideY(begin: 0.05),
               ),
             ],
           );
@@ -84,7 +85,7 @@ class CareerScreen extends StatelessWidget {
               sessionId: auth.userId,
             );
           },
-        );
+        ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05);
       },
     );
   }

@@ -27,7 +27,7 @@ const io = new Server(httpServer, {
 initSocketService(io);
 
 app.use(cors({ 
-  origin: [process.env.FRONTEND_URL, 'http://127.0.0.1:3000', 'http://localhost:3000'], 
+  origin: [process.env.FRONTEND_URL, 'http://127.0.0.1:3000', 'http://localhost:3000', 'http://localhost:8080', 'http://127.0.0.1:8080'], 
   credentials: true 
 }));
 app.use(express.json({ limit: '10mb' }));
