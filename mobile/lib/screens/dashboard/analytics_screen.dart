@@ -59,30 +59,30 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 ),
                 const SizedBox(height: 24),
                 _buildStatCard(
-                  'Total Users',
-                  data['users']?.toString() ?? '0',
-                  Icons.people_outline,
+                  'Total Queries',
+                  data['summary']?['totalCalls']?.toString() ?? '0',
+                  Icons.route_outlined,
                   IrisColors.peach,
                 ),
                 const SizedBox(height: 16),
                 _buildStatCard(
-                  'Chats Processed',
-                  data['chats']?.toString() ?? '0',
-                  Icons.chat_bubble_outline,
+                  'Actual Cost',
+                  '\$${(data['summary']?['totalCost'] ?? 0).toStringAsFixed(4)}',
+                  Icons.attach_money,
                   IrisColors.mint,
                 ),
                 const SizedBox(height: 16),
                 _buildStatCard(
-                  'Quizzes Taken',
-                  data['quizzes']?.toString() ?? '0',
-                  Icons.quiz_outlined,
+                  'Saved Cost',
+                  '\$${(data['summary']?['savedCost'] ?? 0).toStringAsFixed(4)}',
+                  Icons.savings_outlined,
                   IrisColors.sunny,
                 ),
                 const SizedBox(height: 16),
                 _buildStatCard(
-                  'Career Plans',
-                  data['careers']?.toString() ?? '0',
-                  Icons.work_outline,
+                  'Savings %',
+                  '${data['summary']?['savingsPercent'] ?? 0}%',
+                  Icons.percent,
                   IrisColors.sky,
                 ),
                 const SizedBox(height: 32),
@@ -110,7 +110,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                             sideTitles: SideTitles(
                               showTitles: true,
                               getTitlesWidget: (value, meta) {
-                                const titles = ['Users', 'Chats', 'Quizzes', 'Careers'];
+                                const titles = ['Simple', 'Medium', 'Complex'];
                                 if (value.toInt() >= 0 && value.toInt() < titles.length) {
                                   return Padding(
                                     padding: const EdgeInsets.only(top: 8.0),
@@ -134,10 +134,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         gridData: const FlGridData(show: false),
                         borderData: FlBorderData(show: false),
                         barGroups: [
-                          _makeBarData(0, (data['users'] ?? 0).toDouble(), IrisColors.peach),
-                          _makeBarData(1, (data['chats'] ?? 0).toDouble(), IrisColors.mint),
-                          _makeBarData(2, (data['quizzes'] ?? 0).toDouble(), IrisColors.sunny),
-                          _makeBarData(3, (data['careers'] ?? 0).toDouble(), IrisColors.sky),
+                          _makeBarData(0, (data['complexityBuckets']?['simple'] ?? 0).toDouble(), IrisColors.mint),
+                          _makeBarData(1, (data['complexityBuckets']?['medium'] ?? 0).toDouble(), IrisColors.sunny),
+                          _makeBarData(2, (data['complexityBuckets']?['complex'] ?? 0).toDouble(), IrisColors.peach),
                         ],
                       ),
                     ),

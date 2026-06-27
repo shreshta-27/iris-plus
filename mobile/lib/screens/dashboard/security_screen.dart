@@ -41,9 +41,9 @@ class _SecurityScreenState extends State<SecurityScreen> {
           );
         }
 
-        final blockedCount = data['blockedCount'] ?? 0;
-        final totalScanned = data['totalScanned'] ?? 0;
-        final logs = data['logs'] as List<dynamic>? ?? [];
+        final blockedCount = data['summary']?['totalBlocked'] ?? 0;
+        final totalScanned = data['summary']?['totalSuspicious'] ?? 0;
+        final logs = data['recentEvents'] as List<dynamic>? ?? [];
 
         return RefreshIndicator(
           onRefresh: provider.fetchSecurity,
@@ -90,9 +90,9 @@ class _SecurityScreenState extends State<SecurityScreen> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: _buildStatCard(
-                      'Scanned',
+                      'Suspicious',
                       totalScanned.toString(),
-                      Icons.radar,
+                      Icons.warning_amber_rounded,
                       IrisColors.mint,
                     ),
                   ),
