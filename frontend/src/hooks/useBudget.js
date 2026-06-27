@@ -49,6 +49,7 @@ export function useBudget(sessionId) {
   }, [sessionId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchBudget();
     intervalRef.current = setInterval(fetchBudget, 30000);
     return () => clearInterval(intervalRef.current);

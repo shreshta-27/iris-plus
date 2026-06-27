@@ -130,7 +130,7 @@ function VerifyOTPForm() {
             disabled={loading}
             className="text-iris-purple hover:text-ink font-bold underline decoration-2 underline-offset-4 transition-colors text-sm"
           >
-            Didn't receive the email? Resend OTP
+            Didn&apos;t receive the email? Resend OTP
           </button>
         </div>
       </motion.div>

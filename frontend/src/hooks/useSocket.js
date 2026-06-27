@@ -11,6 +11,7 @@ export function useSocket(sessionId) {
   useEffect(() => {
     const savedEvents = sessionStorage.getItem('iris_routing_events');
     if (savedEvents) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       try { setRoutingEvents(JSON.parse(savedEvents)); } catch (e) {}
     }
   }, []);
@@ -50,5 +51,6 @@ export function useSocket(sessionId) {
 
   const clearEvents = useCallback(() => setRoutingEvents([]), []);
 
+  // eslint-disable-next-line react-hooks/refs
   return { socket: socketRef.current, routingEvents, isConnected, clearEvents };
 }

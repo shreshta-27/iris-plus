@@ -8,8 +8,6 @@ import BudgetMeter from '@/components/ui/BudgetMeter';
 import { useBudget } from '@/hooks/useBudget';
 import { RiMenuLine, RiWallet3Line } from 'react-icons/ri';
 
-import { RiMenuLine } from 'react-icons/ri';
-
 export default function DashboardLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();

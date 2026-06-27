@@ -7,10 +7,7 @@ import 'highlight.js/styles/atom-one-dark.css'; // Premium dark mode syntax high
 import RoutingChip from '@/components/ui/RoutingChip';
 import InjectionBadge from '@/components/ui/InjectionBadge';
 import { RiUser3Line, RiRobot2Line } from 'react-icons/ri';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeHighlight from 'rehype-highlight';
-import 'highlight.js/styles/github-dark.css';
+
 
 export default function ChatMessage({ message }) {
   const isUser = message.role === 'user';

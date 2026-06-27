@@ -1,0 +1,88 @@
+import { Session } from '../models/Session.model.js';
+import { SecurityLog } from '../models/SecurityLog.model.js';
+import { BudgetTracker } from '../models/BudgetTracker.model.js';
+
+export async function getAnalyticsDashboard(req, res, next) {
+  try {
+    const userId = req.user.id || req.user._id;
+
+    // 1. Get Budget Tracker for the user
+    const tracker = await BudgetTracker.findOne({ sessionId: req.query.sessionId || 'demo-session-id' });
+    const history = tracker?.history || [];
+
+    // 2. Aggregate Model Usage & Savings
+    const modelDistribution = {};
+    let totalCost = 0;
+    let worstCaseCost = 0;
+
+    history.forEach(h => {
+      modelDistribution[h.model] = (modelDistribution[h.model] || 0) + 1;
+      totalCost += h.cost;
+      
+      // Counterfactual calculation: What if we used Sonnet for everything?
+      // For estimation: Assuming avg 250 input / 300 output tokens per call
+      worstCaseCost += (250 / 1000000 * 3.00) + (300 / 1000000 * 15.00); 
+    });
+
+    // 3. Complexity Distribution
+    const complexityBuckets = {
+      simple: history.filter(h => h.tier === 'simple').length,
+      medium: history.filter(h => h.tier === 'medium').length,
+      complex: history.filter(h => h.tier === 'complex').length,
+    };
+
+    return res.json({
+      summary: {
+        totalCalls: history.length,
+        totalCost: parseFloat(totalCost.toFixed(6)),
+        savedCost: parseFloat((worstCaseCost - totalCost).toFixed(6)),
+        savingsPercent: worstCaseCost > 0 ? parseFloat((((worstCaseCost - totalCost) / worstCaseCost) * 100).toFixed(1)) : 0,
+      },
+      modelDistribution,
+      complexityBuckets,
+      recentHistory: history.slice(-50), // For burn down chart
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getSecurityDashboard(req, res, next) {
+  try {
+    const userId = req.user.id || req.user._id;
+
+    const logs = await SecurityLog.find({ 
+      sessionId: req.query.sessionId || 'demo-session-id' 
+    }).sort({ timestamp: -1 }).limit(100);
+
+    const totalBlocked = logs.filter(l => l.action === 'blocked').length;
+    const totalSuspicious = logs.filter(l => l.action === 'passed' && l.threatLevel === 'suspicious').length;
+
+    const layerBreakdown = {
+      local: logs.filter(l => l.detectionLayer === 'local' && l.action === 'blocked').length,
+      piguard: logs.filter(l => l.detectionLayer === 'piguard').length,
+      response: logs.filter(l => l.detectionLayer === 'response').length,
+    };
+
+    const categoryBreakdown = {};
+    logs.forEach(log => {
+      log.matchedPatterns.forEach(pattern => {
+        categoryBreakdown[pattern.label] = (categoryBreakdown[pattern.label] || 0) + 1;
+      });
+    });
+
+    return res.json({
+      summary: {
+        totalBlocked,
+        totalSuspicious,
+        shieldStatus: totalBlocked > 0 ? 'active_blocking' : 'monitoring',
+        savedBySecurity: parseFloat((totalBlocked * 0.005).toFixed(4)), // Est avg cost avoided
+      },
+      layerBreakdown,
+      categoryBreakdown,
+      recentEvents: logs.slice(0, 20),
+    });
+  } catch (err) {
+    next(err);
+  }
+}

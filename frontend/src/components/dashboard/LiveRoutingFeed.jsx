@@ -43,7 +43,7 @@ export default function LiveRoutingFeed({ events }) {
                     </span>
                     <span className="text-coral font-bold text-[10px]">Cost: $0.00</span>
                   </div>
-                  <h4 className="font-bold text-ink/70 text-sm mb-2 break-words truncate">"{event.message || event.promptExcerpt}"</h4>
+                  <h4 className="font-bold text-ink/70 text-sm mb-2 break-words truncate">&quot;{event.message || event.promptExcerpt}&quot;</h4>
                 </div>
               </motion.div>
             );
@@ -69,7 +69,7 @@ export default function LiveRoutingFeed({ events }) {
                   </span>
                 </div>
                 
-                <h4 className="font-bold text-ink text-sm mb-2 break-words">"{event.promptExcerpt}"</h4>
+                <h4 className="font-bold text-ink text-sm mb-2 break-words">&quot;{event.promptExcerpt}&quot;</h4>
                 
                 <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t-[2px] border-ink/10">
                   <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 border-[2px] border-ink rounded-full flex items-center gap-1 ${getTierColor(event.modelDisplayName || event.tier)}`}>
@@ -89,10 +89,6 @@ export default function LiveRoutingFeed({ events }) {
             </motion.div>
           );
         })}
-      </AnimatePresence>
-            </div>
-          </motion.div>
-        ))}
       </AnimatePresence>
     </div>
   );

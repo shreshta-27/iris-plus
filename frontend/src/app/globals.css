@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+/* 
+  TAILWIND V4 SAFELIST FOR DYNAMIC CLASSES
+  The following classes are used dynamically via string interpolation (e.g. bg-${color}) 
+  and must be included here so Tailwind generates them.
+  
+  bg-cream bg-ink bg-iris-purple bg-coral bg-sunny bg-mint bg-sky bg-peach
+  bg-cream/10 bg-ink/10 bg-iris-purple/10 bg-coral/10 bg-sunny/10 bg-mint/10 bg-sky/10 bg-peach/10
+  border-cream border-ink border-iris-purple border-coral border-sunny border-mint border-sky border-peach
+  text-cream text-ink text-iris-purple text-coral text-sunny text-mint text-sky text-peach
+  shadow-cream shadow-ink shadow-iris-purple shadow-coral shadow-sunny shadow-mint shadow-sky shadow-peach
+  shadow-[6px_6px_0_var(--color-iris-purple)] shadow-[6px_6px_0_var(--color-sunny)] shadow-[6px_6px_0_var(--color-peach)]
+  shadow-[6px_6px_0_var(--color-mint)] shadow-[6px_6px_0_var(--color-coral)] shadow-[6px_6px_0_var(--color-sky)]
+  shadow-[6px_6px_0_var(--color-cream)] shadow-[6px_6px_0_var(--color-ink)]
+*/
+
 @theme {
   --font-sans: 'Space Grotesk', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
