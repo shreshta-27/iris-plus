@@ -1,36 +1,31 @@
-'use client';
-import { RiCpuLine } from 'react-icons/ri';
-
 export default function RoutingChip({ routing, cost }) {
-  if (!routing) return null;
+  if (!routing || !routing.tier) return null;
 
-  const getTierColor = (tier) => {
-    const t = tier?.toLowerCase() || '';
-    if (t.includes('complex')) return 'coral';
-    if (t.includes('medium')) return 'sunny';
-    return 'mint';
+  const tierColors = {
+    'Haiku 4.5': 'bg-sunny',
+    'Sonnet 4.6': 'bg-coral',
+    'Kimi K2.6': 'bg-mint'
   };
 
-  const colorName = getTierColor(routing.tier);
+  const bg = tierColors[routing.modelDisplayName] || 'bg-white';
 
   return (
-    <div className={`inline-flex items-center bg-cream border-2 border-ink shadow-[2px_2px_0_#1A1A2E]`}>
-      <div className={`bg-${colorName} px-2 py-1 border-r-2 border-ink flex items-center gap-1`}>
-        <RiCpuLine className="w-4 h-4 text-ink" />
-        <span className="text-[10px] font-black text-ink uppercase tracking-widest">
-          {routing.tier || 'Simple'}
+    <div className="flex flex-wrap items-center gap-3">
+      <div className={`inline-flex items-center gap-2 px-4 py-2 border-[3px] border-ink ${bg} rounded-full shadow-[4px_4px_0_#1A1A2E]`}>
+        <span className="w-2 h-2 rounded-full bg-ink animate-pulse" />
+        <span className="font-black text-xs uppercase tracking-widest text-ink">
+          {routing.modelDisplayName || routing.tier}
         </span>
       </div>
-      <div className="px-3 py-1 flex items-center gap-3">
-        <span className="text-xs font-bold text-ink">
-          {routing.modelDisplayName || 'Kimi K2.6'}
-        </span>
-        {cost !== undefined && (
-          <span className="text-[10px] font-mono font-bold text-ink/70 bg-white px-1 border border-ink/20">
-            ${cost.toFixed(4)}
+      
+      {cost > 0 && (
+        <div className="inline-flex items-center px-4 py-2 border-[3px] border-ink bg-cream rounded-full shadow-[4px_4px_0_#1A1A2E]">
+          <span className="font-mono font-bold text-xs text-ink/70">Cost:</span>
+          <span className="font-mono font-bold text-xs ml-2 text-ink">
+            ${Number(cost).toFixed(5)}
           </span>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

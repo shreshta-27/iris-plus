@@ -62,53 +62,53 @@
 
   /* Core Neo-Brutalist UI Components */
   .neo-card {
-    @apply bg-white border-3 border-ink relative transition-all duration-200;
-    box-shadow: 4px 4px 0px var(--color-ink);
+    @apply bg-white border-[4px] border-ink rounded-3xl relative transition-all duration-300;
+    box-shadow: 8px 8px 0px var(--color-ink);
   }
   
   .neo-card:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px var(--color-ink);
+    transform: translate(-4px, -4px);
+    box-shadow: 12px 12px 0px var(--color-ink);
   }
 
   .btn-primary {
-    @apply bg-iris-purple text-white font-bold px-6 py-3 border-3 border-ink transition-all duration-200 flex items-center gap-2;
-    box-shadow: 4px 4px 0px var(--color-ink);
+    @apply bg-iris-purple text-white font-bold px-6 py-3 border-[4px] border-ink rounded-full transition-all duration-300 flex items-center gap-2;
+    box-shadow: 6px 6px 0px var(--color-ink);
   }
 
   .btn-primary:hover:not(:disabled) {
     transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px var(--color-ink);
+    box-shadow: 8px 8px 0px var(--color-ink);
   }
   
   .btn-primary:active:not(:disabled) {
-    transform: translate(2px, 2px);
+    transform: translate(6px, 6px);
     box-shadow: 0px 0px 0px var(--color-ink);
   }
 
   .btn-outline {
-    @apply bg-cream text-iris-purple font-bold px-6 py-3 border-3 border-ink transition-all duration-200 flex items-center gap-2;
-    box-shadow: 4px 4px 0px var(--color-ink);
+    @apply bg-cream text-iris-purple font-bold px-6 py-3 border-[4px] border-ink rounded-full transition-all duration-300 flex items-center gap-2;
+    box-shadow: 6px 6px 0px var(--color-ink);
   }
 
   .btn-outline:hover:not(:disabled) {
     @apply bg-white text-ink;
     transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px var(--color-ink);
+    box-shadow: 8px 8px 0px var(--color-ink);
   }
 
   .btn-outline:active:not(:disabled) {
-    transform: translate(2px, 2px);
+    transform: translate(6px, 6px);
     box-shadow: 0px 0px 0px var(--color-ink);
   }
 
   .input-brutal {
-    @apply w-full bg-white border-3 border-ink text-ink p-3 outline-none transition-all duration-200 font-medium;
+    @apply w-full bg-white border-[4px] border-ink text-ink p-4 outline-none transition-all duration-300 font-medium rounded-2xl;
   }
 
   .input-brutal:focus {
     @apply border-iris-purple;
-    box-shadow: 4px 4px 0px var(--color-iris-purple);
+    box-shadow: 6px 6px 0px var(--color-iris-purple);
     transform: translate(-2px, -2px);
   }
   
@@ -117,23 +117,23 @@
     color: #8C8C8C;
   }
 
-  /* Colored Card Accents */
-  .card-coral { border-top: 6px solid var(--color-coral); }
-  .card-sunny { border-top: 6px solid var(--color-sunny); }
-  .card-mint { border-top: 6px solid var(--color-mint); }
-  .card-sky { border-top: 6px solid var(--color-sky); }
-  .card-peach { border-top: 6px solid var(--color-peach); }
-  .card-purple { border-top: 6px solid var(--color-iris-purple); }
+  /* Colored Card Accents - now with top borders fitting rounded corners */
+  .card-coral { border-top-width: 12px; border-top-color: var(--color-coral); }
+  .card-sunny { border-top-width: 12px; border-top-color: var(--color-sunny); }
+  .card-mint { border-top-width: 12px; border-top-color: var(--color-mint); }
+  .card-sky { border-top-width: 12px; border-top-color: var(--color-sky); }
+  .card-peach { border-top-width: 12px; border-top-color: var(--color-peach); }
+  .card-purple { border-top-width: 12px; border-top-color: var(--color-iris-purple); }
   
-  .card-left-coral { border-left: 6px solid var(--color-coral); }
-  .card-left-sunny { border-left: 6px solid var(--color-sunny); }
-  .card-left-mint { border-left: 6px solid var(--color-mint); }
-  .card-left-purple { border-left: 6px solid var(--color-iris-purple); }
+  .card-left-coral { border-left-width: 16px; border-left-color: var(--color-coral); }
+  .card-left-sunny { border-left-width: 16px; border-left-color: var(--color-sunny); }
+  .card-left-mint { border-left-width: 16px; border-left-color: var(--color-mint); }
+  .card-left-purple { border-left-width: 16px; border-left-color: var(--color-iris-purple); }
 
   /* Sticker Tags */
   .tag-sticker {
-    @apply px-3 py-1 font-bold text-xs uppercase border-2 border-ink inline-block bg-white text-ink;
-    box-shadow: 2px 2px 0px var(--color-ink);
+    @apply px-4 py-1 font-bold text-xs uppercase border-[3px] border-ink inline-block bg-white text-ink rounded-full;
+    box-shadow: 4px 4px 0px var(--color-ink);
   }
 
   /* Animated Utilities */

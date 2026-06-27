@@ -22,22 +22,22 @@ export default function QuizUpload({ onGenerate, loading }) {
   };
 
   return (
-    <div className="neo-card card-sunny p-6 md:p-8 bg-white">
-      <h3 className="text-2xl font-black text-ink mb-6 flex items-center gap-3">
-        <div className="w-10 h-10 bg-sunny border-2 border-ink flex items-center justify-center shadow-[2px_2px_0_#1A1A2E]">
-          <RiBookOpenLine className="w-5 h-5 text-ink" />
+    <div className="neo-card p-6 md:p-8 bg-white border-t-[16px] border-t-sunny">
+      <h3 className="text-3xl font-black text-ink mb-8 flex items-center gap-4">
+        <div className="w-12 h-12 rounded-full bg-sunny border-[3px] border-ink flex items-center justify-center shadow-[4px_4px_0_#1A1A2E]">
+          <RiBookOpenLine className="w-6 h-6 text-ink" />
         </div>
         Configure Quiz
       </h3>
 
-      <div className="flex gap-3 mb-6 bg-cream p-2 border-3 border-ink inline-flex shadow-[inset_2px_2px_0_rgba(0,0,0,0.05)]">
+      <div className="flex gap-4 mb-8 bg-cream p-3 border-[4px] border-ink inline-flex shadow-[inset_4px_4px_0_rgba(0,0,0,0.05)] rounded-[2rem]">
         {['topic', 'notes'].map(m => (
           <button
             key={m}
             onClick={() => setMode(m)}
-            className={`px-5 py-2 font-bold uppercase tracking-widest text-sm transition-all border-2 ${
+            className={`px-6 py-3 font-bold uppercase tracking-widest text-sm transition-all border-[3px] rounded-full ${
               mode === m 
-                ? 'bg-ink text-cream border-ink shadow-[2px_2px_0_#FFD93D]' 
+                ? 'bg-ink text-cream border-ink shadow-[4px_4px_0_#FFD93D]' 
                 : 'bg-transparent border-transparent text-ink/60 hover:text-ink'
             }`}
           >
@@ -46,8 +46,8 @@ export default function QuizUpload({ onGenerate, loading }) {
         ))}
       </div>
 
-      <div className="mb-6">
-        <label className="block text-xs font-black text-ink uppercase tracking-widest mb-2">
+      <div className="mb-8">
+        <label className="block text-sm font-black text-ink uppercase tracking-widest mb-3 ml-2">
           {mode === 'topic' ? 'Subject / Topic' : 'Study Notes Content'}
         </label>
         {mode === 'topic' ? (
@@ -56,7 +56,7 @@ export default function QuizUpload({ onGenerate, loading }) {
             value={topic}
             onChange={e => setTopic(e.target.value)}
             placeholder="e.g., Photosynthesis, Data Structures, WW2..."
-            className="input-brutal text-lg p-4"
+            className="input-brutal text-lg p-5"
           />
         ) : (
           <textarea
@@ -64,47 +64,47 @@ export default function QuizUpload({ onGenerate, loading }) {
             onChange={e => setNoteContent(e.target.value)}
             placeholder="Paste your study notes here..."
             rows={6}
-            className="input-brutal text-base p-4 resize-none"
+            className="input-brutal text-lg p-5 resize-none"
           />
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
         <div>
-          <label className="block text-xs font-black text-ink uppercase tracking-widest mb-2">
+          <label className="block text-sm font-black text-ink uppercase tracking-widest mb-3 ml-2">
             Difficulty Level
           </label>
           <div className="relative">
             <select
               value={difficulty}
               onChange={e => setDifficulty(e.target.value)}
-              className="input-brutal text-lg p-4 appearance-none cursor-pointer pr-10"
+              className="input-brutal text-lg p-5 appearance-none cursor-pointer pr-12 bg-white"
             >
               <option value="easy">🟢 Easy</option>
               <option value="medium">🟡 Medium</option>
               <option value="hard">🔴 Hard</option>
             </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none border-l-3 border-ink bg-cream">
-              <svg className="w-4 h-4 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="square" strokeLinejoin="miter" strokeWidth="3" d="M19 9l-7 7-7-7"></path></svg>
+            <div className="absolute inset-y-0 right-0 flex items-center px-5 pointer-events-none border-l-[4px] border-ink bg-cream rounded-r-2xl">
+              <svg className="w-5 h-5 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M19 9l-7 7-7-7"></path></svg>
             </div>
           </div>
         </div>
         <div>
-          <label className="block text-xs font-black text-ink uppercase tracking-widest mb-2">
+          <label className="block text-sm font-black text-ink uppercase tracking-widest mb-3 ml-2">
             Number of Questions
           </label>
           <div className="relative">
             <select
               value={numQuestions}
               onChange={e => setNumQuestions(Number(e.target.value))}
-              className="input-brutal text-lg p-4 appearance-none cursor-pointer pr-10"
+              className="input-brutal text-lg p-5 appearance-none cursor-pointer pr-12 bg-white"
             >
               {[3, 5, 7, 10].map(n => (
                 <option key={n} value={n}>{n} Questions</option>
               ))}
             </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none border-l-3 border-ink bg-cream">
-              <svg className="w-4 h-4 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="square" strokeLinejoin="miter" strokeWidth="3" d="M19 9l-7 7-7-7"></path></svg>
+            <div className="absolute inset-y-0 right-0 flex items-center px-5 pointer-events-none border-l-[4px] border-ink bg-cream rounded-r-2xl">
+              <svg className="w-5 h-5 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M19 9l-7 7-7-7"></path></svg>
             </div>
           </div>
         </div>
@@ -113,16 +113,16 @@ export default function QuizUpload({ onGenerate, loading }) {
       <button
         onClick={handleSubmit}
         disabled={loading}
-        className="btn-primary w-full flex items-center justify-center gap-3 text-xl py-4 bg-iris-purple hover:bg-iris-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="btn-primary w-full flex items-center justify-center gap-3 text-xl py-5 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? (
           <>
-            <RiLoader4Line className="w-6 h-6 animate-spin" />
+            <RiLoader4Line className="w-7 h-7 animate-spin" />
             Generating Quiz...
           </>
         ) : (
           <>
-            <RiUploadCloud2Line className="w-6 h-6" />
+            <RiUploadCloud2Line className="w-7 h-7" />
             Generate Quiz Now
           </>
         )}

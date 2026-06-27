@@ -12,56 +12,64 @@ export default function ChatMessage({ message }) {
   const isError = message.isError;
   const isBlocked = message.isBlocked;
 
-  let bgClass = 'bg-white border-3 border-ink shadow-[4px_4px_0_#1A1A2E]';
-  let accentClass = 'border-l-[8px] border-l-mint';
-  
+  // Neo-Brutalist rounded bubble styling
+  let containerClass = 'flex gap-4 p-5 md:p-6 mb-2 animate-slide-up bg-white border-[4px] border-ink shadow-[6px_6px_0_#1A1A2E]';
+  let borderRadiusClass = 'rounded-[2rem] rounded-tl-sm'; // AI messages: square top-left
+  let avatarColor = 'bg-mint text-ink';
+
   if (isUser) {
-    bgClass = 'bg-iris-purple/10 border-3 border-ink shadow-[4px_4px_0_#1A1A2E]';
-    accentClass = 'border-l-[8px] border-l-iris-purple';
+    containerClass = 'flex gap-4 p-5 md:p-6 mb-2 animate-slide-up bg-[#F5F0FF] border-[4px] border-ink shadow-[6px_6px_0_#1A1A2E]';
+    borderRadiusClass = 'rounded-[2rem] rounded-tr-sm'; // User messages: square top-right
+    avatarColor = 'bg-iris-purple text-white';
   } else if (isError || isBlocked) {
-    bgClass = 'bg-coral/10 border-3 border-ink shadow-[4px_4px_0_#1A1A2E]';
-    accentClass = 'border-l-[8px] border-l-coral';
+    containerClass = 'flex gap-4 p-5 md:p-6 mb-2 animate-slide-up bg-[#FFF0F0] border-[4px] border-ink shadow-[6px_6px_0_#1A1A2E]';
+    borderRadiusClass = 'rounded-[2rem] rounded-tl-sm';
+    avatarColor = 'bg-coral text-ink';
   }
 
   return (
-    <div className={`flex gap-3 md:gap-4 p-4 md:p-5 mb-4 animate-slide-up ${bgClass} ${accentClass}`}>
-      <div className={`w-10 h-10 flex-shrink-0 flex items-center justify-center border-2 border-ink shadow-[2px_2px_0_#1A1A2E] ${isUser ? 'bg-iris-purple text-white' : 'bg-mint text-ink'}`}>
-        {isUser ? <RiUser3Line className="w-5 h-5" /> : <RiRobot2Line className="w-5 h-5" />}
-      </div>
-
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-3 mb-2 flex-wrap">
-          <span className="text-sm font-black text-ink uppercase tracking-wider">
-            {isUser ? 'You' : 'IRIS'}
-          </span>
-          {!isUser && message.injectionStatus && (
-            <InjectionBadge status={message.injectionStatus} />
-          )}
+    <div className={`w-full flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+      <div className={`max-w-[85%] ${containerClass} ${borderRadiusClass}`}>
+        
+        {/* Avatar */}
+        <div className={`w-12 h-12 flex-shrink-0 flex items-center justify-center border-[3px] border-ink rounded-full shadow-[2px_2px_0_#1A1A2E] ${avatarColor}`}>
+          {isUser ? <RiUser3Line className="w-6 h-6" /> : <RiRobot2Line className="w-6 h-6" />}
         </div>
 
-        <div className="text-base text-ink font-medium leading-relaxed break-words prose prose-sm max-w-none prose-headings:font-black prose-a:text-iris-purple prose-code:font-mono prose-code:bg-cream prose-code:border prose-code:border-ink/20 prose-code:px-1 prose-pre:border-3 prose-pre:border-ink prose-pre:bg-ink prose-pre:text-cream prose-pre:shadow-[4px_4px_0_#1A1A2E]">
-          {isUser ? (
-            <div className="whitespace-pre-wrap">{message.content}</div>
-          ) : (
-            <ReactMarkdown 
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeHighlight]}
-            >
-              {message.content}
-            </ReactMarkdown>
-          )}
-        </div>
-
-        {!isUser && message.routing && (
-          <div className="mt-4 pt-4 border-t-2 border-ink/10">
-            <RoutingChip routing={message.routing} cost={message.cost} />
-            {message.routing.reason && (
-              <p className="text-[11px] font-mono font-bold text-ink/50 mt-2 bg-cream p-2 border-2 border-ink/20">
-                <span className="text-ink">ROUTING_REASON:</span> {message.routing.reason}
-              </p>
+        <div className="flex-1 min-w-0 pt-1">
+          <div className="flex items-center gap-3 mb-3 flex-wrap">
+            <span className="text-sm font-black text-ink uppercase tracking-widest">
+              {isUser ? 'You' : 'IRIS'}
+            </span>
+            {!isUser && message.injectionStatus && (
+              <InjectionBadge status={message.injectionStatus} />
             )}
           </div>
-        )}
+
+          <div className="text-base md:text-lg text-ink font-medium leading-relaxed break-words prose prose-base max-w-none prose-headings:font-black prose-a:text-iris-purple prose-code:font-mono prose-code:bg-cream prose-code:border-2 prose-code:border-ink/20 prose-code:px-2 prose-code:rounded-lg prose-pre:border-[4px] prose-pre:border-ink prose-pre:bg-ink prose-pre:text-cream prose-pre:shadow-[6px_6px_0_#1A1A2E] prose-pre:rounded-2xl">
+            {isUser ? (
+              <div className="whitespace-pre-wrap">{message.content}</div>
+            ) : (
+              <ReactMarkdown 
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeHighlight]}
+              >
+                {message.content}
+              </ReactMarkdown>
+            )}
+          </div>
+
+          {!isUser && message.routing && (
+            <div className="mt-6 pt-5 border-t-[3px] border-ink/10">
+              <RoutingChip routing={message.routing} cost={message.cost} />
+              {message.routing.reason && (
+                <p className="text-xs font-mono font-bold text-ink/70 mt-3 bg-white p-3 border-[3px] border-ink/20 rounded-xl">
+                  <span className="text-ink">ROUTING_REASON:</span> {message.routing.reason}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

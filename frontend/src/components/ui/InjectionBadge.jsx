@@ -1,20 +1,28 @@
-'use client';
-import { RiShieldCheckLine, RiShieldCrossLine } from 'react-icons/ri';
+import { RiShieldCheckLine, RiShieldCrossLine, RiShieldKeyholeLine } from 'react-icons/ri';
 
 export default function InjectionBadge({ status }) {
-  if (!status || status === 'unknown') return null;
+  if (!status || status === 'safe') return null;
 
-  const isSafe = status === 'safe';
-  
+  const config = {
+    suspicious: {
+      color: 'bg-sunny',
+      icon: RiShieldKeyholeLine,
+      label: 'Suspicious'
+    },
+    blocked: {
+      color: 'bg-coral',
+      icon: RiShieldCrossLine,
+      label: 'Blocked'
+    }
+  };
+
+  const { color, icon: Icon, label } = config[status] || config.suspicious;
+
   return (
-    <div className={`inline-flex items-center gap-1.5 px-2 py-1 border-2 border-ink shadow-[2px_2px_0_#1A1A2E] ${isSafe ? 'bg-mint' : 'bg-coral text-white'}`}>
-      {isSafe ? (
-        <RiShieldCheckLine className="w-4 h-4 text-ink" />
-      ) : (
-        <RiShieldCrossLine className="w-4 h-4 text-white" />
-      )}
-      <span className={`text-[10px] font-black uppercase tracking-widest ${isSafe ? 'text-ink' : 'text-white'}`}>
-        {isSafe ? 'PIGuard Safe' : 'Injection Blocked'}
+    <div className={`inline-flex items-center gap-2 px-3 py-1 border-[3px] border-ink ${color} rounded-full shadow-[2px_2px_0_#1A1A2E]`}>
+      <Icon className="w-4 h-4 text-ink" />
+      <span className="font-black text-[10px] uppercase tracking-widest text-ink">
+        {label}
       </span>
     </div>
   );

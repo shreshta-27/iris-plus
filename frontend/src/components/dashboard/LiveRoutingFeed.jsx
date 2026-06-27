@@ -1,55 +1,61 @@
 'use client';
 import { motion, AnimatePresence } from 'framer-motion';
+import { RiTimeLine } from 'react-icons/ri';
 
-export default function LiveRoutingFeed({ events = [] }) {
-  if (events.length === 0) {
+const getTierColor = (tier) => {
+  if (tier === 'Haiku 4.5') return 'bg-sunny';
+  if (tier === 'Sonnet 4.6') return 'bg-coral';
+  return 'bg-mint'; // Kimi K2.6
+};
+
+export default function LiveRoutingFeed({ events }) {
+  if (!events || events.length === 0) {
     return (
-      <div className="h-full flex flex-col justify-center items-center text-center p-4">
-        <div className="w-12 h-12 bg-cream border-3 border-ink flex items-center justify-center mb-3 shadow-[2px_2px_0_#1A1A2E]">
-          <span className="text-xl animate-pulse">📡</span>
+      <div className="flex flex-col items-center justify-center h-full text-ink/40 space-y-4">
+        <div className="w-16 h-16 border-[4px] border-dashed border-ink/20 rounded-full flex items-center justify-center">
+          <RiTimeLine className="w-8 h-8" />
         </div>
-        <p className="text-sm font-bold text-ink/60 uppercase tracking-widest">Waiting for traffic...</p>
+        <p className="font-bold text-sm uppercase tracking-widest text-center">Waiting for queries...</p>
       </div>
     );
   }
 
-  const getEventColor = (tier) => {
-    const t = tier?.toLowerCase() || '';
-    if (t.includes('complex')) return 'coral';
-    if (t.includes('medium')) return 'sunny';
-    return 'mint';
-  };
-
   return (
-    <div className="space-y-3 font-mono">
-      <AnimatePresence>
-        {events.map((ev) => {
-          const color = getEventColor(ev.tier);
-          
-          return (
-            <motion.div
-              key={ev.id}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-cream border-2 border-ink p-2 text-xs relative overflow-hidden shadow-[2px_2px_0_#1A1A2E]"
-            >
-              <div className={`absolute left-0 top-0 bottom-0 w-2 bg-${color} border-r-2 border-ink`}></div>
-              <div className="pl-4">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="font-black text-ink uppercase tracking-wider">{ev.type}</span>
-                  <span className="text-[9px] text-ink/50 bg-white px-1 border border-ink/20">{ev.timestamp}</span>
-                </div>
-                <div className="text-[10px] text-ink font-bold mb-1 truncate">
-                  User: {ev.user}
-                </div>
-                <div className="flex justify-between items-center bg-white p-1 border border-ink/20">
-                  <span className={`text-${color} font-black drop-shadow-sm`}>{ev.tier}</span>
-                  <span className="text-ink font-bold">{ev.model}</span>
-                </div>
+    <div className="space-y-4 pb-4">
+      <AnimatePresence initial={false}>
+        {events.map((event) => (
+          <motion.div
+            key={event.id}
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            className={`p-4 bg-white border-[3px] border-ink rounded-2xl shadow-[4px_4px_0_#1A1A2E] relative overflow-hidden`}
+          >
+            {/* Colored side accent (rounded) */}
+            <div className={`absolute left-0 top-0 bottom-0 w-3 border-r-[3px] border-ink ${getTierColor(event.modelDisplayName || event.tier)}`} />
+            
+            <div className="pl-3">
+              <div className="flex justify-between items-start mb-2">
+                <span className="text-xs font-black uppercase text-ink/50 tracking-widest">
+                  {new Date(event.timestamp).toLocaleTimeString()}
+                </span>
+                <span className="font-mono font-bold text-[10px] bg-cream border-[2px] border-ink px-2 py-0.5 rounded-full text-ink">
+                  ${Number(event.cost).toFixed(4)}
+                </span>
               </div>
-            </motion.div>
-          );
-        })}
+              
+              <h4 className="font-bold text-ink text-sm mb-2 break-words">"{event.promptExcerpt}"</h4>
+              
+              <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t-[2px] border-ink/10">
+                <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 border-[2px] border-ink rounded-full ${getTierColor(event.modelDisplayName || event.tier)}`}>
+                  {event.modelDisplayName || event.tier}
+                </span>
+                <span className="text-[10px] font-bold text-ink/70 px-2 py-1 bg-cream border-[2px] border-transparent rounded-full flex-1 truncate" title={event.reason}>
+                  {event.reason}
+                </span>
+              </div>
+            </div>
+          </motion.div>
+        ))}
       </AnimatePresence>
     </div>
   );
