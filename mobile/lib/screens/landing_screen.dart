@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../core/theme.dart';
 import '../widgets/neo_button.dart';
 import '../widgets/neo_card.dart';
@@ -62,7 +63,7 @@ class LandingScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
+              ).animate().fadeIn(duration: 500.ms).slideY(begin: -0.2),
 
               // Hero Section
               Padding(
@@ -103,10 +104,11 @@ class LandingScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
-                          ),
+                          ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+                           .moveY(begin: -5, end: 5, duration: 1500.ms, curve: Curves.easeInOut),
                         ),
                       ],
-                    ),
+                    ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.2),
                     const SizedBox(height: 8),
                     Text(
                       'Smarter.',
@@ -117,7 +119,7 @@ class LandingScreen extends StatelessWidget {
                         color: IrisColors.irisPurple,
                         height: 1.1,
                       ),
-                    ),
+                    ).animate().fadeIn(delay: 200.ms, duration: 600.ms).slideY(begin: 0.2),
                     const SizedBox(height: 24),
                     Text(
                       'The AI-powered platform that adapts to your learning style. Chat, generate quizzes, and plan your career with the smartest models available.',
@@ -128,7 +130,7 @@ class LandingScreen extends StatelessWidget {
                         color: IrisColors.ink.withValues(alpha: 0.7),
                         height: 1.5,
                       ),
-                    ),
+                    ).animate().fadeIn(delay: 400.ms, duration: 600.ms).slideY(begin: 0.2),
                     const SizedBox(height: 48),
                     SizedBox(
                       width: double.infinity,
@@ -137,7 +139,7 @@ class LandingScreen extends StatelessWidget {
                         icon: Icons.rocket_launch,
                         onPressed: () => Navigator.pushNamed(context, '/register'),
                       ),
-                    ),
+                    ).animate().fadeIn(delay: 600.ms, duration: 600.ms).scale(begin: const Offset(0.9, 0.9)),
                   ],
                 ),
               ),
@@ -156,28 +158,28 @@ class LandingScreen extends StatelessWidget {
                         letterSpacing: 2,
                         color: IrisColors.ink,
                       ),
-                    ),
+                    ).animate().fadeIn(delay: 800.ms).slideX(begin: -0.1),
                     const SizedBox(height: 24),
                     _buildFeatureCard(
                       title: 'Smart AI Routing',
                       desc: 'Automatically connects you to the best AI model (Claude, GPT, Kimi) based on your query complexity.',
                       icon: Icons.route,
                       color: IrisColors.sunny,
-                    ),
+                    ).animate().fadeIn(delay: 900.ms, duration: 500.ms).slideY(begin: 0.1),
                     const SizedBox(height: 24),
                     _buildFeatureCard(
                       title: 'Quiz Forge',
                       desc: 'Generate custom quizzes from your notes or PDF uploads instantly to test your knowledge.',
                       icon: Icons.quiz,
                       color: IrisColors.sky,
-                    ),
+                    ).animate().fadeIn(delay: 1000.ms, duration: 500.ms).slideY(begin: 0.1),
                     const SizedBox(height: 24),
                     _buildFeatureCard(
                       title: 'Career Simulator',
                       desc: 'Map out your career path based on your current skills and target role with AI-generated actionable steps.',
                       icon: Icons.work,
                       color: IrisColors.peach,
-                    ),
+                    ).animate().fadeIn(delay: 1100.ms, duration: 500.ms).slideY(begin: 0.1),
                   ],
                 ),
               ),
@@ -212,7 +214,7 @@ class LandingScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
+              ).animate().fadeIn(delay: 1300.ms),
             ],
           ),
         ),

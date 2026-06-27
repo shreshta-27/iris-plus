@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 
 class DashboardShell extends StatelessWidget {
@@ -51,7 +52,7 @@ class DashboardShell extends StatelessWidget {
             _buildNavItem(Icons.shield_outlined, 'Security', IrisColors.coral, currentIndex == 4),
           ],
         ),
-      ),
+      ).animate().slideY(begin: 1, duration: 400.ms, curve: Curves.easeOutQuad),
     );
   }
 
@@ -71,7 +72,7 @@ class DashboardShell extends StatelessWidget {
           size: 24,
           color: isSelected ? IrisColors.ink : IrisColors.ink.withValues(alpha: 0.5),
         ),
-      ),
+      ).animate(target: isSelected ? 1 : 0).scaleXY(end: 1.1, duration: 200.ms),
       label: label,
     );
   }

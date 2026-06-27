@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 import '../../core/api_service.dart';
 import '../../providers/auth_provider.dart';
@@ -71,7 +72,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   color: IrisColors.coral,
                   border: Border.all(color: IrisColors.ink, width: 3),
                 ),
-              ),
+              ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+               .moveY(begin: 5, end: -5, duration: 1800.ms, curve: Curves.easeInOut),
             ),
             Positioned(
               bottom: 40,
@@ -83,7 +85,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   color: IrisColors.sky,
                   border: Border.all(color: IrisColors.ink, width: 3),
                 ),
-              ),
+              ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+               .moveY(begin: -5, end: 5, duration: 2200.ms, curve: Curves.easeInOut),
             ),
             Center(
               child: SingleChildScrollView(
@@ -105,7 +108,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 Text('IRIS ',
                                     style: GoogleFonts.spaceGrotesk(
                                         fontSize: 28, fontWeight: FontWeight.w900, color: IrisColors.ink)),
-                                Text('✦',
+                                const Text('✦',
                                     style: TextStyle(fontSize: 28, color: IrisColors.irisPurple)),
                               ],
                             ),
@@ -134,13 +137,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.spaceGrotesk(
                                       fontWeight: FontWeight.w700, fontSize: 13, color: IrisColors.coral)),
-                            ),
+                            ).animate().fadeIn().shake(),
                           NeoInput(
                             controller: _nameCtrl,
                             label: 'Full Name',
                             prefixIcon: Icons.person_outline,
                             placeholder: 'John Doe',
-                          ),
+                          ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
                           const SizedBox(height: 14),
                           NeoInput(
                             controller: _emailCtrl,
@@ -148,7 +151,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             prefixIcon: Icons.email_outlined,
                             placeholder: 'student@university.edu',
                             keyboardType: TextInputType.emailAddress,
-                          ),
+                          ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
                           const SizedBox(height: 14),
                           NeoInput(
                             controller: _passwordCtrl,
@@ -156,7 +159,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             prefixIcon: Icons.lock_outline,
                             placeholder: '••••••••',
                             obscureText: true,
-                          ),
+                          ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1),
                           const SizedBox(height: 20),
                           SizedBox(
                             width: double.infinity,
@@ -166,7 +169,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               isLoading: _loading,
                               onPressed: _loading ? null : _handleSubmit,
                             ),
-                          ),
+                          ).animate().fadeIn(delay: 500.ms).scale(begin: const Offset(0.9, 0.9)),
                           const SizedBox(height: 24),
                           Container(
                             padding: const EdgeInsets.only(top: 20),
@@ -193,7 +196,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                               ],
                             ),
-                          ),
+                          ).animate().fadeIn(delay: 600.ms),
                         ],
                       ),
                     ),
@@ -207,12 +210,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           backgroundColor: IrisColors.mint,
                           fontSize: 14,
                         ),
-                      ),
+                      ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+                       .scaleXY(end: 1.05, duration: 1000.ms, curve: Curves.easeInOut),
                     ),
                   ],
                 ),
               ),
-            ),
+            ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05),
           ],
         ),
       ),
