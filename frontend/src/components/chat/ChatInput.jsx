@@ -1,31 +1,43 @@
 'use client';
 import { useState, useRef, useCallback } from 'react';
-import { RiSendPlaneLine, RiLoader4Line, RiErrorWarningLine } from 'react-icons/ri';
+import { RiSendPlaneLine, RiLoader4Line, RiErrorWarningLine, RiAttachmentLine, RiFileTextLine } from 'react-icons/ri';
 
 export default function ChatInput({ onSend, disabled, budgetExceeded }) {
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [attachedFileText, setAttachedFileText] = useState('');
+  const [attachedFileName, setAttachedFileName] = useState('');
+  
   const textareaRef = useRef(null);
+  const fileInputRef = useRef(null);
   const lastSendRef = useRef(0);
 
   const handleSend = useCallback(async () => {
     const now = Date.now();
     if (now - lastSendRef.current < 1000) return;
-    if (!message.trim() || sending || disabled) return;
+    
+    const finalMessage = attachedFileText 
+      ? `[Attached Document: ${attachedFileName}]\n${attachedFileText}\n\nUser Query: ${message}` 
+      : message;
+
+    if (!finalMessage.trim() || sending || disabled) return;
 
     lastSendRef.current = now;
     setSending(true);
 
     try {
-      await onSend(message.trim());
+      await onSend(finalMessage.trim());
       setMessage('');
+      setAttachedFileText('');
+      setAttachedFileName('');
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
       }
     } finally {
       setSending(false);
     }
-  }, [message, sending, disabled, onSend]);
+  }, [message, sending, disabled, onSend, attachedFileText, attachedFileName]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -43,6 +55,40 @@ export default function ChatInput({ onSend, disabled, budgetExceeded }) {
     }
   };
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/upload/document', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('iris_token')}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error('Upload failed');
+      
+      const data = await response.json();
+      setAttachedFileText(data.text);
+      setAttachedFileName(file.name);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to process document or image.');
+    } finally {
+      setUploading(false);
+      // Reset input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   return (
     <div className="border-t-[4px] border-ink bg-white p-3 md:p-4 relative z-20">
       <div className="max-w-4xl mx-auto">
@@ -55,7 +101,43 @@ export default function ChatInput({ onSend, disabled, budgetExceeded }) {
           </div>
         )}
         
+        {attachedFileName && (
+          <div className="mb-3 px-4 py-2 bg-cream border-[3px] border-ink rounded-xl flex items-center justify-between shadow-[3px_3px_0_#1A1A2E]">
+            <div className="flex items-center gap-2 overflow-hidden">
+              <RiFileTextLine className="w-5 h-5 text-ink flex-shrink-0" />
+              <p className="text-ink font-bold text-sm truncate">
+                {attachedFileName} attached
+              </p>
+            </div>
+            <button 
+              onClick={() => { setAttachedFileName(''); setAttachedFileText(''); }}
+              className="text-ink/60 hover:text-coral font-bold text-lg ml-2 leading-none"
+            >
+              &times;
+            </button>
+          </div>
+        )}
+        
         <div className="flex items-end gap-3 relative">
+          <input 
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept=".pdf,image/*,.txt"
+            onChange={handleFileUpload}
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={disabled || budgetExceeded || uploading}
+            className="bg-cream text-ink border-[3px] border-ink rounded-full h-[52px] w-[52px] flex-shrink-0 flex items-center justify-center shadow-[4px_4px_0_#1A1A2E] hover:-translate-y-0.5 hover:shadow-[5px_5px_0_#1A1A2E] active:translate-y-[3px] active:shadow-[1px_1px_0_#1A1A2E] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {uploading ? (
+              <RiLoader4Line className="w-6 h-6 animate-spin" />
+            ) : (
+              <RiAttachmentLine className="w-6 h-6" />
+            )}
+          </button>
+          
           <textarea
             ref={textareaRef}
             value={message}
@@ -68,7 +150,7 @@ export default function ChatInput({ onSend, disabled, budgetExceeded }) {
           />
           <button
             onClick={handleSend}
-            disabled={!message.trim() || sending || disabled || budgetExceeded}
+            disabled={(!message.trim() && !attachedFileText) || sending || disabled || budgetExceeded}
             className="bg-iris-purple text-white border-[3px] border-ink rounded-full h-[52px] w-[52px] flex-shrink-0 flex items-center justify-center shadow-[4px_4px_0_#1A1A2E] hover:-translate-y-0.5 hover:shadow-[5px_5px_0_#1A1A2E] active:translate-y-[3px] active:shadow-[1px_1px_0_#1A1A2E] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {sending ? (

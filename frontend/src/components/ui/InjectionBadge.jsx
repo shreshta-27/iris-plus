@@ -1,7 +1,7 @@
 import { RiShieldCheckLine, RiShieldCrossLine, RiShieldKeyholeLine } from 'react-icons/ri';
 
 export default function InjectionBadge({ status }) {
-  if (!status || status === 'safe') return null;
+  if (!status || status === 'safe' || status === 'clean') return null;
 
   const config = {
     suspicious: {

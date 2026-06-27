@@ -11,6 +11,17 @@ const messageSchema = new mongoose.Schema({
     degraded: Boolean,
   },
   cost: Number,
+  costSavings: {
+    actualCost: Number,
+    worstCaseCost: Number,
+    saved: Number,
+    savedPercent: Number,
+  },
+  tokens: {
+    input: Number,
+    output: Number,
+  },
+  latencyMs: Number,
   injectionStatus: { type: String, enum: ['clean', 'blocked', 'monitor'], default: 'clean' },
   timestamp: { type: Date, default: Date.now },
 });

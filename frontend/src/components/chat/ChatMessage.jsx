@@ -6,13 +6,34 @@ import rehypeHighlight from 'rehype-highlight';
 import 'highlight.js/styles/atom-one-dark.css'; // Premium dark mode syntax highlighting
 import RoutingChip from '@/components/ui/RoutingChip';
 import InjectionBadge from '@/components/ui/InjectionBadge';
-import { RiUser3Line, RiRobot2Line } from 'react-icons/ri';
+import { RiUser3Line, RiRobot2Line, RiFileCopyLine, RiCheckLine, RiShareForwardLine } from 'react-icons/ri';
 
 
 export default function ChatMessage({ message }) {
   const isUser = message.role === 'user';
   const isError = message.isError;
   const isBlocked = message.isBlocked;
+  const [copied, setCopied] = useState(false);
+  const [shared, setShared] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(message.content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'IRIS Response',
+        text: message.content,
+      }).catch(console.error);
+    } else {
+      handleCopy();
+      setShared(true);
+      setTimeout(() => setShared(false), 2000);
+    }
+  };
 
   // Neo-Brutalist rounded bubble styling
   let containerClass = 'flex gap-4 p-5 md:p-6 mb-2 animate-slide-up bg-white border-[4px] border-ink shadow-[6px_6px_0_#1A1A2E]';
@@ -78,6 +99,25 @@ export default function ChatMessage({ message }) {
                   <span className="text-ink">ROUTING_REASON:</span> {message.routing.reason}
                 </p>
               )}
+            </div>
+          )}
+
+          {!isUser && (
+            <div className="mt-4 flex gap-2">
+              <button 
+                onClick={handleCopy}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border-2 border-ink rounded-lg shadow-[2px_2px_0_#1A1A2E] hover:translate-y-px hover:shadow-[1px_1px_0_#1A1A2E] transition-all text-xs font-black uppercase tracking-widest text-ink"
+              >
+                {copied ? <RiCheckLine className="w-4 h-4 text-mint" /> : <RiFileCopyLine className="w-4 h-4" />}
+                {copied ? 'Copied!' : 'Copy'}
+              </button>
+              <button 
+                onClick={handleShare}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border-2 border-ink rounded-lg shadow-[2px_2px_0_#1A1A2E] hover:translate-y-px hover:shadow-[1px_1px_0_#1A1A2E] transition-all text-xs font-black uppercase tracking-widest text-ink"
+              >
+                {shared ? <RiCheckLine className="w-4 h-4 text-mint" /> : <RiShareForwardLine className="w-4 h-4" />}
+                {shared ? 'Shared!' : 'Share'}
+              </button>
             </div>
           )}
         </div>

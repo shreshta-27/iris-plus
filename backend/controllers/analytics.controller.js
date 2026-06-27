@@ -8,6 +8,40 @@ export async function getAnalyticsDashboard(req, res, next) {
 
     // 1. Get Budget Tracker for the user
     const tracker = await BudgetTracker.findOne({ sessionId: req.query.sessionId || 'demo-session-id' });
+    
+    // Fetch rich history from ALL Session models for this user
+    const allSessions = await Session.find({ userId: userId }).sort({ createdAt: -1 });
+    let richHistory = [];
+    
+    allSessions.forEach(session => {
+      if (session && session.messages) {
+        // Filter for assistant messages which have routing info
+        const sessionHistory = session.messages
+          .filter(m => m.role === 'assistant' && m.routing)
+          .map(m => {
+            // Find corresponding user message
+            const userMsg = session.messages[session.messages.indexOf(m) - 1];
+            return {
+              id: m._id,
+              timestamp: m.timestamp,
+              query: userMsg ? userMsg.content : 'Unknown Query',
+              model: m.routing.model,
+              tier: m.routing.tier,
+              cost: m.cost,
+              costSavings: m.costSavings,
+              tokens: m.tokens,
+              latencyMs: m.latencyMs,
+              routingReason: m.routing.reason,
+              analysisBreakdown: m.routing.analysisBreakdown,
+            };
+          });
+        richHistory = [...richHistory, ...sessionHistory];
+      }
+    });
+
+    // Sort richHistory by timestamp descending
+    richHistory.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
     const history = tracker?.history || [];
 
     // 2. Aggregate Model Usage & Savings
@@ -18,9 +52,6 @@ export async function getAnalyticsDashboard(req, res, next) {
     history.forEach(h => {
       modelDistribution[h.model] = (modelDistribution[h.model] || 0) + 1;
       totalCost += h.cost;
-      
-      // Counterfactual calculation: What if we used Sonnet for everything?
-      // For estimation: Assuming avg 250 input / 300 output tokens per call
       worstCaseCost += (250 / 1000000 * 3.00) + (300 / 1000000 * 15.00); 
     });
 
@@ -40,7 +71,7 @@ export async function getAnalyticsDashboard(req, res, next) {
       },
       modelDistribution,
       complexityBuckets,
-      recentHistory: history.slice(-50), // For burn down chart
+      recentHistory: richHistory.length > 0 ? richHistory.slice(-50).reverse() : history.slice(-50).reverse(), // Send rich history
     });
   } catch (err) {
     next(err);

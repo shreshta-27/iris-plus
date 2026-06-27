@@ -26,6 +26,17 @@ export async function handleAIChat(req, res, next) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
+    const startTime = Date.now();
+    
+    // Moving Train Step 1: Query Received
+    emitRoutingEvent(sessionId, {
+      type: 'routing_step',
+      step: 1,
+      status: 'analyzing',
+      message: 'Query Received. Analyzing intent...',
+      timestamp: new Date().toISOString()
+    });
+
     const budgetStatsBefore = await getAllBudgetStats(sessionId);
 
     // 1. Zero-Cost Semantic Caching / RAG
@@ -118,6 +129,15 @@ export async function handleAIChat(req, res, next) {
       return res.json(responsePayload);
     }
 
+    // Moving Train Step 2: Context Window & Security Check
+    emitRoutingEvent(sessionId, {
+      type: 'routing_step',
+      step: 2,
+      status: 'analyzing',
+      message: `Estimating Context Window: ~${Math.round(message.length / 4)} tokens. Running PIGuard...`,
+      timestamp: new Date().toISOString()
+    });
+
     // 3. Local Injection Detection (Layer 1)
     const localInjectionResult = detectInjection(message);
     if (localInjectionResult.isInjection) {
@@ -150,6 +170,15 @@ export async function handleAIChat(req, res, next) {
       });
     }
 
+    // Moving Train Step 3: Routing Logic
+    emitRoutingEvent(sessionId, {
+      type: 'routing_step',
+      step: 3,
+      status: 'routing',
+      message: `Security passed. Evaluating query complexity for optimal routing...`,
+      timestamp: new Date().toISOString()
+    });
+
     // 4. Dynamic Prompt Classification
     const classification = classifyPrompt(message);
     const baseModel = MODELS[classification.tier.toUpperCase()];
@@ -172,6 +201,23 @@ export async function handleAIChat(req, res, next) {
 
     let injectionStatus = localInjectionResult.threatLevel === 'suspicious' ? 'monitor' : 'clean';
     let otariResult;
+
+    // Moving Train Step 4: Model Selected
+    emitRoutingEvent(sessionId, {
+      type: 'routing_step',
+      step: 4,
+      status: 'routing',
+      message: `Routed to ${MODEL_DISPLAY_NAMES[selectedModel]}. Reason: ${degradeReason || classification.reason}`,
+      timestamp: new Date().toISOString()
+    });
+
+    emitRoutingEvent(sessionId, {
+      type: 'routing_step',
+      step: 5,
+      status: 'generating',
+      message: `Streaming response from ${MODEL_DISPLAY_NAMES[selectedModel]}...`,
+      timestamp: new Date().toISOString()
+    });
 
     // 6. Otari API Call with edge guardrail (Layer 2)
     try {
@@ -324,6 +370,8 @@ export async function handleAIChat(req, res, next) {
       injectionStatus,
     });
 
+    const latencyMs = Date.now() - startTime;
+
     // Save to Chat Session History in MongoDB
     if (userId && sessionId) {
       // Find session or create one, add message
@@ -338,6 +386,9 @@ export async function handleAIChat(req, res, next) {
                 content: otariResult.answer,
                 routing: responsePayload.routing,
                 cost: otariResult.cost,
+                costSavings: responsePayload.costSavings,
+                tokens: responsePayload.tokens,
+                latencyMs,
                 injectionStatus,
               }
             ]
@@ -346,6 +397,15 @@ export async function handleAIChat(req, res, next) {
         { upsert: true }
       );
     }
+
+    // Moving Train Step 6: Done
+    emitRoutingEvent(sessionId, {
+      type: 'routing_step',
+      step: 6,
+      status: 'done',
+      message: `Response generated in ${latencyMs}ms.`,
+      timestamp: new Date().toISOString()
+    });
 
     emitRoutingEvent(sessionId, {
       type: 'routing_decision',

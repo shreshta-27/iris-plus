@@ -49,12 +49,45 @@ export default function LiveRoutingFeed({ events }) {
             );
           }
 
+          if (event.type === 'routing_step') {
+            const getIcon = () => {
+              if (event.step === 1) return <RiTimeLine className="w-4 h-4" />;
+              if (event.step === 2) return <RiBrainLine className="w-4 h-4" />;
+              if (event.step === 3) return <RiRouteLine className="w-4 h-4" />;
+              if (event.step === 4) return <RiBrainLine className="w-4 h-4" />;
+              if (event.step === 5) return <RiTimeLine className="w-4 h-4 animate-spin" />;
+              if (event.step === 6) return <RiShieldLine className="w-4 h-4" />;
+              return <RiTimeLine className="w-4 h-4" />;
+            };
+            
+            return (
+              <motion.div
+                key={event.id || `step-${i}`}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="relative pl-6 py-2"
+              >
+                {/* Pipeline connector line */}
+                <div className="absolute left-[11px] top-0 bottom-0 w-0.5 bg-ink/20" />
+                {/* Status Dot */}
+                <div className="absolute left-[3px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-cream border-2 border-ink flex items-center justify-center text-ink z-10 shadow-[2px_2px_0_#1A1A2E]">
+                  {event.status === 'done' ? <div className="w-2 h-2 bg-mint rounded-full" /> : <div className="w-1.5 h-1.5 bg-sunny rounded-full animate-pulse" />}
+                </div>
+                
+                <div className="bg-white border-2 border-ink rounded-lg p-2 shadow-[2px_2px_0_#1A1A2E] flex items-center gap-2">
+                  <span className="text-ink/60">{getIcon()}</span>
+                  <span className="text-xs font-bold text-ink">{event.message}</span>
+                </div>
+              </motion.div>
+            );
+          }
+
           return (
             <motion.div
-              key={event.id || i}
+              key={event.id || `card-${i}`}
               initial={{ opacity: 0, y: -20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              className={`p-4 bg-white border-[3px] border-ink rounded-2xl shadow-[4px_4px_0_#1A1A2E] relative overflow-hidden`}
+              className={`p-4 bg-white border-[3px] border-ink rounded-2xl shadow-[4px_4px_0_#1A1A2E] relative overflow-hidden mt-2`}
             >
               {/* Colored side accent (rounded) */}
               <div className={`absolute left-0 top-0 bottom-0 w-3 border-r-[3px] border-ink ${getTierColor(event.modelDisplayName || event.tier)}`} />
@@ -69,7 +102,7 @@ export default function LiveRoutingFeed({ events }) {
                   </span>
                 </div>
                 
-                <h4 className="font-bold text-ink text-sm mb-2 break-words">&quot;{event.promptExcerpt}&quot;</h4>
+                <h4 className="font-bold text-ink text-sm mb-2 break-words">&quot;{event.promptExcerpt || 'Processed Query'}&quot;</h4>
                 
                 <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t-[2px] border-ink/10">
                   <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 border-[2px] border-ink rounded-full flex items-center gap-1 ${getTierColor(event.modelDisplayName || event.tier)}`}>

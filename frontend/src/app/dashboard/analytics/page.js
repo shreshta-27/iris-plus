@@ -5,13 +5,18 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell
 } from 'recharts';
-import { RiMoneyDollarCircleLine, RiBrainLine, RiRouteLine, RiLineChartLine } from 'react-icons/ri';
+import { RiMoneyDollarCircleLine as RiMoney, RiBrainLine as RiBrain, RiRouteLine as RiRoute, RiLineChartLine as RiLineChart, RiEyeLine } from 'react-icons/ri';
+import JourneyModal from '@/components/dashboard/JourneyModal';
+import AllHistoryModal from '@/components/dashboard/AllHistoryModal';
+import { TIER_COLORS } from '@/lib/constants';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899'];
 
 export default function AnalyticsDashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedQuery, setSelectedQuery] = useState(null);
+  const [showAllHistory, setShowAllHistory] = useState(false);
 
   useEffect(() => {
     api.get('/api/analytics/overview')
@@ -49,9 +54,12 @@ export default function AnalyticsDashboard() {
 
       {/* Top Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border-[4px] border-ink shadow-[4px_4px_0_#1A1A2E] rounded-2xl p-5 flex flex-col gap-2 relative overflow-hidden">
+        <div 
+          onClick={() => setShowAllHistory(true)}
+          className="bg-white border-[4px] border-ink shadow-[4px_4px_0_#1A1A2E] rounded-2xl p-5 flex flex-col gap-2 relative overflow-hidden cursor-pointer hover:-translate-y-1 hover:translate-x-1 hover:shadow-[2px_2px_0_#1A1A2E] transition-all group"
+        >
           <div className="flex items-center gap-2 text-ink/70 z-10">
-            <RiRouteLine className="w-5 h-5 text-ink" />
+            <RiRoute className="w-5 h-5 text-ink group-hover:scale-110 transition-transform" />
             <span className="text-xs uppercase font-black tracking-widest text-ink">Total Queries</span>
           </div>
           <span className="text-4xl font-black text-ink z-10 mt-2">{data.summary.totalCalls}</span>
@@ -59,7 +67,7 @@ export default function AnalyticsDashboard() {
         
         <div className="bg-sunny border-[4px] border-ink shadow-[4px_4px_0_#1A1A2E] rounded-2xl p-5 flex flex-col gap-2 relative overflow-hidden">
           <div className="flex items-center gap-2 text-ink/70 z-10">
-            <RiMoneyDollarCircleLine className="w-5 h-5 text-ink" />
+            <RiMoney className="w-5 h-5 text-ink" />
             <span className="text-xs uppercase font-black tracking-widest text-ink">Actual Cost</span>
           </div>
           <span className="text-4xl font-black text-ink z-10 mt-2">${data.summary.totalCost.toFixed(4)}</span>
@@ -67,7 +75,7 @@ export default function AnalyticsDashboard() {
 
         <div className="bg-mint border-[4px] border-ink shadow-[4px_4px_0_#1A1A2E] rounded-2xl p-5 flex flex-col gap-2 lg:col-span-2 relative overflow-hidden">
           <div className="flex items-center gap-2 z-10">
-            <RiLineChartLine className="w-5 h-5 text-ink" />
+            <RiLineChart className="w-5 h-5 text-ink" />
             <span className="text-xs uppercase font-black tracking-widest text-ink">IRIS Saved You</span>
           </div>
           <div className="flex items-end gap-3 z-10 mt-1">
@@ -77,7 +85,7 @@ export default function AnalyticsDashboard() {
             </span>
           </div>
           <p className="text-xs font-bold text-ink/80 mt-2 z-10">Compared to routing all queries to Claude Sonnet 4.6</p>
-          <RiMoneyDollarCircleLine className="absolute -right-6 -bottom-10 w-40 h-40 text-white/20 rotate-12" />
+          <RiMoney className="absolute -right-6 -bottom-10 w-40 h-40 text-white/20 rotate-12" />
         </div>
       </div>
 
@@ -149,6 +157,53 @@ export default function AnalyticsDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Recent Queries for Deep Analysis */}
+      <div id="history-section" className="bg-white border-[4px] border-ink shadow-[6px_6px_0_#1A1A2E] rounded-3xl p-6 mt-6">
+        <h3 className="text-sm font-black uppercase tracking-widest text-ink border-b-4 border-ink pb-2 mb-6 inline-block">Deep Analysis: Recent Queries</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {data.recentHistory.length > 0 ? (
+            data.recentHistory.slice(0, 6).map((query, i) => (
+              <div 
+                key={query.id || i} 
+                onClick={() => setSelectedQuery(query)}
+                className="group cursor-pointer bg-cream border-[3px] border-ink rounded-2xl p-4 shadow-[4px_4px_0_#1A1A2E] hover:shadow-[2px_2px_0_#1A1A2E] hover:translate-y-1 hover:translate-x-1 transition-all"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 border-2 border-ink rounded-full ${TIER_COLORS[query.tier] || 'bg-white'}`}>
+                    {query.model?.split('/')[1] || query.model || 'Unknown'}
+                  </span>
+                  <RiEyeLine className="w-5 h-5 text-ink/40 group-hover:text-ink transition-colors" />
+                </div>
+                <p className="font-bold text-ink text-sm line-clamp-2 mb-3">&quot;{query.query || 'View details...'}&quot;</p>
+                <div className="flex justify-between items-center text-xs font-bold text-ink/60 border-t-2 border-ink/10 pt-2">
+                  <span>{new Date(query.timestamp).toLocaleTimeString()}</span>
+                  <span className="bg-white px-2 py-0.5 rounded border-2 border-ink text-ink font-black">${Number(query.cost || 0).toFixed(4)}</span>
+                </div>
+              </div>
+            ))
+          ) : (
+             <div className="col-span-full text-center text-ink/60 font-bold text-lg border-[3px] border-dashed border-ink/40 rounded-2xl p-8">No queries found for analysis.</div>
+          )}
+        </div>
+      </div>
+
+      {/* All History Modal */}
+      {showAllHistory && (
+        <AllHistoryModal 
+          history={data.recentHistory} 
+          onClose={() => setShowAllHistory(false)} 
+          onSelectQuery={(query) => {
+            setSelectedQuery(query);
+            setShowAllHistory(false);
+          }}
+        />
+      )}
+
+      {/* Journey Modal */}
+      {selectedQuery && (
+        <JourneyModal queryData={selectedQuery} onClose={() => setSelectedQuery(null)} />
+      )}
     </div>
   );
 }
