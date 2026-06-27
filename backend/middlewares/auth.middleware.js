@@ -3,7 +3,7 @@ import { User } from '../models/User.model.js';
 
 export async function authenticate(req, res, next) {
   try {
-    const token = req.cookies?.iris_token;
+    const token = req.cookies?.iris_token || (req.headers.authorization && req.headers.authorization.split(' ')[1]);
     if (!token) return res.status(401).json({ error: 'Not authenticated' });
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
