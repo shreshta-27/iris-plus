@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 import '../../providers/analytics_provider.dart';
 import '../../widgets/neo_card.dart';
@@ -56,35 +57,35 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     fontWeight: FontWeight.w900,
                     color: IrisColors.ink,
                   ),
-                ),
+                ).animate().fadeIn().slideX(begin: -0.1),
                 const SizedBox(height: 24),
                 _buildStatCard(
                   'Total Queries',
                   data['summary']?['totalCalls']?.toString() ?? '0',
                   Icons.route_outlined,
                   IrisColors.peach,
-                ),
+                ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.1),
                 const SizedBox(height: 16),
                 _buildStatCard(
                   'Actual Cost',
                   '\$${(data['summary']?['totalCost'] ?? 0).toStringAsFixed(4)}',
                   Icons.attach_money,
                   IrisColors.mint,
-                ),
+                ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
                 const SizedBox(height: 16),
                 _buildStatCard(
                   'Saved Cost',
                   '\$${(data['summary']?['savedCost'] ?? 0).toStringAsFixed(4)}',
                   Icons.savings_outlined,
                   IrisColors.sunny,
-                ),
+                ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
                 const SizedBox(height: 16),
                 _buildStatCard(
                   'Savings %',
                   '${data['summary']?['savingsPercent'] ?? 0}%',
                   Icons.percent,
                   IrisColors.sky,
-                ),
+                ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1),
                 const SizedBox(height: 32),
                 Text(
                   'System Usage Map',
@@ -93,7 +94,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     fontWeight: FontWeight.w900,
                     color: IrisColors.ink,
                   ),
-                ),
+                ).animate().fadeIn(delay: 500.ms).slideX(begin: -0.1),
                 const SizedBox(height: 16),
                 SizedBox(
                   height: 250,
@@ -141,7 +142,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       ),
                     ),
                   ),
-                ),
+                ).animate().fadeIn(delay: 600.ms).scaleXY(begin: 0.9, end: 1),
               ],
             ),
           ),
@@ -191,7 +192,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               boxShadow: IrisShadows.neo(x: 2, y: 2),
             ),
             child: Icon(icon, color: IrisColors.ink, size: 28),
-          ),
+          ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+           .scaleXY(end: 1.1, duration: 1500.ms, curve: Curves.easeInOut),
         ],
       ),
     );

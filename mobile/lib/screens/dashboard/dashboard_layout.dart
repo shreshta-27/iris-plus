@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/budget_provider.dart';
@@ -75,7 +76,7 @@ class _DashboardLayoutState extends State<DashboardLayout> {
       onTabTapped: _onTabTapped,
       child: Column(
         children: [
-          _buildHeader(),
+          _buildHeader().animate().slideY(begin: -1, duration: 400.ms, curve: Curves.easeOutQuad),
           Expanded(child: _screens[_currentIndex]),
         ],
       ),
@@ -113,15 +114,16 @@ class _DashboardLayoutState extends State<DashboardLayout> {
                   child: const Center(
                     child: Text('✦', style: TextStyle(color: IrisColors.irisPurple, fontSize: 20)),
                   ),
-                ),
+                ).animate(onPlay: (controller) => controller.repeat())
+                 .shimmer(duration: 2000.ms, color: IrisColors.irisPurple.withValues(alpha: 0.3)),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'IRIS Plus',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'SpaceGrotesk',
                           fontWeight: FontWeight.w900,
                           fontSize: 18,

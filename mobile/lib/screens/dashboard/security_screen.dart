@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 import '../../providers/analytics_provider.dart';
 import '../../widgets/neo_card.dart';
@@ -64,7 +65,8 @@ class _SecurityScreenState extends State<SecurityScreen> {
                       boxShadow: IrisShadows.small(),
                     ),
                     child: const Icon(Icons.security, color: IrisColors.ink),
-                  ),
+                  ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+                   .scaleXY(end: 1.1, duration: 1500.ms, curve: Curves.easeInOut),
                   const SizedBox(width: 16),
                   Text(
                     'PIGuard Security',
@@ -73,7 +75,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                       fontWeight: FontWeight.w900,
                       color: IrisColors.ink,
                     ),
-                  ),
+                  ).animate().fadeIn().slideX(begin: -0.1),
                 ],
               ),
               const SizedBox(height: 24),
@@ -85,7 +87,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                       blockedCount.toString(),
                       Icons.block,
                       IrisColors.coral,
-                    ),
+                    ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.1),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -94,7 +96,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                       totalScanned.toString(),
                       Icons.warning_amber_rounded,
                       IrisColors.mint,
-                    ),
+                    ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
                   ),
                 ],
               ),
@@ -106,7 +108,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                   fontWeight: FontWeight.w900,
                   color: IrisColors.ink,
                 ),
-              ),
+              ).animate().fadeIn(delay: 300.ms).slideX(begin: -0.1),
               const SizedBox(height: 16),
               if (logs.isEmpty)
                 Container(
@@ -126,10 +128,11 @@ class _SecurityScreenState extends State<SecurityScreen> {
                       ),
                     ),
                   ),
-                )
+                ).animate().fadeIn(delay: 400.ms).scaleXY(begin: 0.9, end: 1)
               else
-                ...logs.map((log) {
-                  final l = log as Map<String, dynamic>;
+                ...logs.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final l = entry.value as Map<String, dynamic>;
                   final timestamp = l['timestamp'] != null
                       ? DateFormat('MMM dd, HH:mm:ss').format(DateTime.parse(l['timestamp']))
                       : '';
@@ -185,7 +188,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                         ],
                       ),
                     ),
-                  );
+                  ).animate().fadeIn(delay: (400 + index * 100).ms).slideX(begin: 0.1);
                 }),
             ],
           ),

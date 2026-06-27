@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 import '../../core/socket_service.dart';
 import '../../providers/auth_provider.dart';
@@ -37,14 +38,22 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _onSocketConnection(bool connected) {
     if (mounted) {
-      setState(() => _isSocketConnected = connected);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() => _isSocketConnected = connected);
+        }
+      });
     }
   }
 
   void _onRoutingEvent(Map<String, dynamic> event) {
     if (mounted) {
-      setState(() {
-        _routingEvents = _socketService.routingEvents;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _routingEvents = _socketService.routingEvents;
+          });
+        }
       });
     }
   }
@@ -100,7 +109,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     if (index == chat.messages.length) {
                       return const TypingIndicator();
                     }
-                    return ChatMessageBubble(message: chat.messages[index]);
+                    return ChatMessageBubble(message: chat.messages[index])
+                        .animate().fadeIn().slideY(begin: 0.1);
                   },
                 ),
         ),
@@ -111,7 +121,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ChatInput(
           onSend: _handleSend,
           disabled: isExceeded,
-        ),
+        ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1),
       ],
     );
   }
@@ -135,7 +145,8 @@ class _ChatScreenState extends State<ChatScreen> {
               child: const Center(
                 child: Icon(Icons.auto_awesome, size: 50, color: IrisColors.ink),
               ),
-            ),
+            ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+             .moveY(begin: -5, end: 5, duration: 2000.ms, curve: Curves.easeInOut),
             const SizedBox(height: 24),
             Text(
               'How can I help you today?',
@@ -145,7 +156,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 fontWeight: FontWeight.w900,
                 color: IrisColors.ink,
               ),
-            ),
+            ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
             const SizedBox(height: 12),
             Text(
               'I route your requests to the best AI model dynamically.',
@@ -155,25 +166,25 @@ class _ChatScreenState extends State<ChatScreen> {
                 fontWeight: FontWeight.w500,
                 color: IrisColors.ink.withValues(alpha: 0.6),
               ),
-            ),
+            ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
             const SizedBox(height: 32),
             _buildSuggestionCard(
               'Explain quantum computing simply',
               'Fast & cheap · Claude Haiku 4.5',
               IrisColors.sunny,
-            ),
+            ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1),
             const SizedBox(height: 16),
             _buildSuggestionCard(
               'Write a Python script for data analysis',
               'Balanced · Kimi K2.6',
               IrisColors.mint,
-            ),
+            ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.1),
             const SizedBox(height: 16),
             _buildSuggestionCard(
               'Analyze this complex legal document',
               'High Reasoning · Claude Sonnet 4.6',
               IrisColors.coral,
-            ),
+            ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.1),
           ],
         ),
       ),

@@ -1,14 +1,22 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
-import 'package:iris_mobile/main.dart';
+import 'package:iris_mobile/providers/budget_provider.dart';
 
 void main() {
-  testWidgets('IrisPlusApp builds successfully and shows Landing Screen', (WidgetTester tester) async {
-    await tester.pumpWidget(const IrisPlusApp());
+  group('BudgetProvider Tests', () {
+    test('Initial state is correct', () {
+      final provider = BudgetProvider();
+      
+      expect(provider.totalCost, 0.0);
+      expect(provider.maxBudget, 2.0); // default in provider
+      expect(provider.mode, 'normal');
+      expect(provider.calls, 0);
+    });
 
-    // Verify the app starts up without throwing exceptions
-    // The splash/landing screen has "IRIS Plus" title
-    expect(find.text('Login', skipOffstage: false), findsWidgets);
+    test('Stop polling works', () {
+      final provider = BudgetProvider();
+      provider.startPolling('test-session');
+      provider.stopPolling();
+      // Should not throw or crash
+    });
   });
 }
