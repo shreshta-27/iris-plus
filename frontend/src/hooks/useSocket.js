@@ -9,6 +9,19 @@ export function useSocket(sessionId) {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
+    const savedEvents = sessionStorage.getItem('iris_routing_events');
+    if (savedEvents) {
+      try { setRoutingEvents(JSON.parse(savedEvents)); } catch (e) {}
+    }
+  }, []);
+
+  useEffect(() => {
+    if (routingEvents.length > 0) {
+      sessionStorage.setItem('iris_routing_events', JSON.stringify(routingEvents));
+    }
+  }, [routingEvents]);
+
+  useEffect(() => {
     if (!sessionId) return;
 
     const socket = io(API_URL, { withCredentials: true });

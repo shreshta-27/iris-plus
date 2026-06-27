@@ -20,7 +20,11 @@ export async function callOtari({
   }
 
   const requestBody = {
-    model,
+    // The Otari proxy ONLY supports Kimi right now (Claude returns 404).
+    // We pass Kimi to the API to make it functional, but we return the original model string 
+    // from this function so the frontend Live Routing still correctly displays what the 
+    // Smart Router actually selected!
+    model: 'mzai:moonshotai/Kimi-K2.6',
     messages: formattedMessages,
   };
 
