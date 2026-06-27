@@ -73,6 +73,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final auth = context.read<AuthProvider>();
     
     await chat.sendMessage(text, auth.userId);
+    if (!mounted) return;
     // Let budget provider catch up via HTTP just in case socket missed it
     context.read<BudgetProvider>().fetchBudget(auth.userId);
     
