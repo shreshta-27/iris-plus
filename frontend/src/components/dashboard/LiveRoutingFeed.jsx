@@ -1,50 +1,56 @@
 'use client';
-import { TIER_COLORS } from '@/lib/constants';
-import { RiRouteLine, RiShieldLine } from 'react-icons/ri';
+import { motion, AnimatePresence } from 'framer-motion';
 
-export default function LiveRoutingFeed({ events }) {
-  if (!events || events.length === 0) {
+export default function LiveRoutingFeed({ events = [] }) {
+  if (events.length === 0) {
     return (
-      <div className="text-center py-6 text-gray-600 text-xs font-mono">
-        No routing events yet. Send a message to see live routing decisions.
+      <div className="h-full flex flex-col justify-center items-center text-center p-4">
+        <div className="w-12 h-12 bg-cream border-3 border-ink flex items-center justify-center mb-3 shadow-[2px_2px_0_#1A1A2E]">
+          <span className="text-xl animate-pulse">📡</span>
+        </div>
+        <p className="text-sm font-bold text-ink/60 uppercase tracking-widest">Waiting for traffic...</p>
       </div>
     );
   }
 
-  return (
-    <div className="space-y-2 max-h-64 overflow-y-auto">
-      {events.slice(0, 15).map((event, i) => {
-        const isBlocked = event.type === 'injection_blocked';
-        const tierStyle = TIER_COLORS[event.tier] || TIER_COLORS.simple;
+  const getEventColor = (tier) => {
+    const t = tier?.toLowerCase() || '';
+    if (t.includes('complex')) return 'coral';
+    if (t.includes('medium')) return 'sunny';
+    return 'mint';
+  };
 
-        return (
-          <div key={i} className={`flex items-start gap-2 p-2 animate-fade-in text-xs ${isBlocked ? 'bg-red-500/5 border border-red-500/20' : 'bg-brutal-black border border-brutal-border'}`}>
-            {isBlocked ? (
-              <RiShieldLine className="w-3.5 h-3.5 text-red-400 flex-shrink-0 mt-0.5" />
-            ) : (
-              <RiRouteLine className="w-3.5 h-3.5 text-iris-400 flex-shrink-0 mt-0.5" />
-            )}
-            <div className="flex-1 min-w-0">
-              {isBlocked ? (
-                <span className="text-red-400 font-bold">Injection Blocked</span>
-              ) : (
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className={`px-1.5 py-0.5 text-[9px] font-bold uppercase ${tierStyle.bg} ${tierStyle.text}`}>
-                    {event.tier}
-                  </span>
-                  <span className="text-gray-400 font-mono">{event.modelDisplayName}</span>
-                  {event.cost?.thisCallFormatted && (
-                    <span className="text-emerald-400 font-mono">{event.cost.thisCallFormatted}</span>
-                  )}
+  return (
+    <div className="space-y-3 font-mono">
+      <AnimatePresence>
+        {events.map((ev) => {
+          const color = getEventColor(ev.tier);
+          
+          return (
+            <motion.div
+              key={ev.id}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="bg-cream border-2 border-ink p-2 text-xs relative overflow-hidden shadow-[2px_2px_0_#1A1A2E]"
+            >
+              <div className={`absolute left-0 top-0 bottom-0 w-2 bg-${color} border-r-2 border-ink`}></div>
+              <div className="pl-4">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="font-black text-ink uppercase tracking-wider">{ev.type}</span>
+                  <span className="text-[9px] text-ink/50 bg-white px-1 border border-ink/20">{ev.timestamp}</span>
                 </div>
-              )}
-              <p className="text-gray-600 font-mono mt-0.5 truncate">
-                {event.timestamp ? new Date(event.timestamp).toLocaleTimeString() : ''}
-              </p>
-            </div>
-          </div>
-        );
-      })}
+                <div className="text-[10px] text-ink font-bold mb-1 truncate">
+                  User: {ev.user}
+                </div>
+                <div className="flex justify-between items-center bg-white p-1 border border-ink/20">
+                  <span className={`text-${color} font-black drop-shadow-sm`}>{ev.tier}</span>
+                  <span className="text-ink font-bold">{ev.model}</span>
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
     </div>
   );
 }

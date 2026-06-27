@@ -1,40 +1,41 @@
 'use client';
-import { BUDGET_MODES } from '@/lib/constants';
+import { RiWallet3Line } from 'react-icons/ri';
+import { motion } from 'framer-motion';
 
 export default function BudgetMeter({ budget }) {
   if (!budget) return null;
-
-  const modeStyle = BUDGET_MODES[budget.mode] || BUDGET_MODES.normal;
-  const percent = Math.min(budget.percentUsed || 0, 100);
+  
+  const { totalCost, maxBudget, mode } = budget;
+  const percentage = Math.min((totalCost / maxBudget) * 100, 100);
+  
+  let statusColor = 'bg-mint';
+  if (mode === 'warning') statusColor = 'bg-sunny';
+  if (mode === 'exceeded') statusColor = 'bg-coral';
 
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Budget</span>
+    <div className="bg-cream border-3 border-ink p-2 sm:p-3 shadow-[4px_4px_0_#1A1A2E] flex flex-col gap-2 w-full max-w-sm">
+      <div className="flex justify-between items-center px-1">
         <div className="flex items-center gap-2">
-          <span className={`text-[10px] font-bold uppercase ${modeStyle.color}`}>
-            {modeStyle.label}
-          </span>
-          <span className="text-xs font-mono text-gray-400">
-            ${budget.spent?.toFixed(4)} / ${budget.total?.toFixed(2)}
-          </span>
+          <RiWallet3Line className="text-ink w-4 h-4 sm:w-5 sm:h-5" />
+          <span className="font-black text-xs sm:text-sm uppercase tracking-widest text-ink">Session Budget</span>
+        </div>
+        <div className="font-mono font-bold text-xs sm:text-sm text-ink bg-white px-2 py-0.5 border-2 border-ink">
+          ${totalCost.toFixed(4)} <span className="text-ink/50">/ ${maxBudget.toFixed(2)}</span>
         </div>
       </div>
-
-      <div className="h-2 bg-brutal-black border border-brutal-border overflow-hidden">
-        <div
-          className={`h-full transition-all duration-500 ease-out ${modeStyle.bg}`}
-          style={{ width: `${percent}%` }}
+      
+      <div className="h-4 sm:h-5 w-full bg-white border-2 border-ink shadow-[inset_2px_2px_0_rgba(0,0,0,0.1)] overflow-hidden relative">
+        <motion.div 
+          className={`h-full ${statusColor} border-r-2 border-ink`}
+          initial={{ width: 0 }}
+          animate={{ width: `${percentage}%` }}
+          transition={{ type: 'spring', stiffness: 50 }}
         />
-      </div>
-
-      <div className="flex items-center justify-between mt-1">
-        <span className="text-[10px] font-mono text-gray-600">
-          {budget.calls || 0} calls · {budget.blockedCalls || 0} blocked
-        </span>
-        <span className="text-[10px] font-mono text-gray-600">
-          ${budget.remaining?.toFixed(4)} left
-        </span>
+        {/* Zebra stripes for Neo-Brutalist effect on progress bar */}
+        <div 
+          className="absolute inset-0 opacity-20 pointer-events-none" 
+          style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, #1A1A2E 10px, #1A1A2E 20px)' }}
+        ></div>
       </div>
     </div>
   );

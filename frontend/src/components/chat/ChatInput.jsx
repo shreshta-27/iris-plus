@@ -1,6 +1,6 @@
 'use client';
 import { useState, useRef, useCallback } from 'react';
-import { RiSendPlaneLine, RiLoader4Line } from 'react-icons/ri';
+import { RiSendPlaneLine, RiLoader4Line, RiErrorWarningLine } from 'react-icons/ri';
 
 export default function ChatInput({ onSend, disabled, budgetExceeded }) {
   const [message, setMessage] = useState('');
@@ -16,14 +16,12 @@ export default function ChatInput({ onSend, disabled, budgetExceeded }) {
     lastSendRef.current = now;
     setSending(true);
 
-    const textToSend = message.trim();
-    setMessage('');
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-    }
-
     try {
-      await onSend(textToSend);
+      await onSend(message.trim());
+      setMessage('');
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+      }
     } finally {
       setSending(false);
     }
@@ -46,13 +44,16 @@ export default function ChatInput({ onSend, disabled, budgetExceeded }) {
   };
 
   return (
-    <div className="border-t-2 border-brutal-border bg-brutal-card p-4">
+    <div className="border-t-3 border-ink bg-white p-4 relative z-20">
       {budgetExceeded && (
-        <div className="mb-3 px-3 py-2 bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-mono">
-          ⛔ Budget exceeded ($2.00 limit reached). Reset budget for demo or start a new session.
+        <div className="mb-3 px-4 py-3 bg-coral border-3 border-ink flex items-start gap-2 shadow-[2px_2px_0_#1A1A2E]">
+          <RiErrorWarningLine className="w-5 h-5 text-ink flex-shrink-0 mt-0.5" />
+          <p className="text-ink font-bold text-sm leading-tight">
+            Budget Exceeded ($2.00 limit reached). Reset budget for demo or start a new session.
+          </p>
         </div>
       )}
-      <div className="flex items-end gap-3">
+      <div className="flex items-end gap-3 relative">
         <textarea
           ref={textareaRef}
           value={message}
@@ -61,23 +62,28 @@ export default function ChatInput({ onSend, disabled, budgetExceeded }) {
           placeholder={budgetExceeded ? 'Budget exceeded...' : 'Ask IRIS anything...'}
           disabled={disabled || budgetExceeded}
           rows={1}
-          className="input-brutal flex-1 resize-none min-h-[44px] max-h-[200px] disabled:opacity-50"
+          className="input-brutal flex-1 resize-none min-h-[56px] max-h-[200px] disabled:opacity-50 disabled:bg-cream disabled:cursor-not-allowed py-4 text-base"
         />
         <button
           onClick={handleSend}
           disabled={!message.trim() || sending || disabled || budgetExceeded}
-          className="btn-primary p-3 flex-shrink-0 disabled:opacity-30 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
+          className="btn-primary p-4 h-[56px] flex-shrink-0 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {sending ? (
-            <RiLoader4Line className="w-5 h-5 animate-spin" />
+            <RiLoader4Line className="w-6 h-6 animate-spin text-white" />
           ) : (
-            <RiSendPlaneLine className="w-5 h-5" />
+            <RiSendPlaneLine className="w-6 h-6 text-white" />
           )}
         </button>
       </div>
-      <p className="text-[10px] text-gray-600 mt-2 font-mono">
-        Shift+Enter for new line · Rate limited to 15 messages/min
-      </p>
+      <div className="flex justify-between items-center mt-2 px-1">
+        <p className="text-[11px] text-ink/60 font-bold uppercase tracking-widest">
+          Shift+Enter for new line
+        </p>
+        <p className="text-[10px] text-ink/40 font-mono font-bold">
+          Rate Limit: 15/min
+        </p>
+      </div>
     </div>
   );
 }

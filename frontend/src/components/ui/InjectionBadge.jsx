@@ -1,20 +1,21 @@
 'use client';
-import { RiShieldCheckLine, RiAlertLine } from 'react-icons/ri';
+import { RiShieldCheckLine, RiShieldCrossLine } from 'react-icons/ri';
 
 export default function InjectionBadge({ status }) {
-  if (status === 'blocked') {
-    return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold font-mono bg-red-500/15 text-red-400 border border-red-500/30">
-        <RiAlertLine className="w-3 h-3" />
-        ⛔ Blocked
-      </span>
-    );
-  }
+  if (!status || status === 'unknown') return null;
 
+  const isSafe = status === 'safe';
+  
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-      <RiShieldCheckLine className="w-3 h-3" />
-      ✓ Clean
-    </span>
+    <div className={`inline-flex items-center gap-1.5 px-2 py-1 border-2 border-ink shadow-[2px_2px_0_#1A1A2E] ${isSafe ? 'bg-mint' : 'bg-coral text-white'}`}>
+      {isSafe ? (
+        <RiShieldCheckLine className="w-4 h-4 text-ink" />
+      ) : (
+        <RiShieldCrossLine className="w-4 h-4 text-white" />
+      )}
+      <span className={`text-[10px] font-black uppercase tracking-widest ${isSafe ? 'text-ink' : 'text-white'}`}>
+        {isSafe ? 'PIGuard Safe' : 'Injection Blocked'}
+      </span>
+    </div>
   );
 }
