@@ -38,7 +38,17 @@ export async function callOtari({
 
   let response;
   try {
-    response = await otariClient.chat.completions.create(requestBody);
+    if (process.env.OTARI_API_KEY === 'mock-key') {
+      response = {
+        usage: { prompt_tokens: Math.floor(Math.random() * 50) + 10, completion_tokens: Math.floor(Math.random() * 50) + 20 },
+        choices: [{ message: { content: "This is a mock response from IRIS! Since you're using a mock API key, I'm just playing along." } }],
+        headers: new Headers()
+      };
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+    } else {
+      response = await otariClient.chat.completions.create(requestBody);
+    }
   } catch (err) {
     // Fallback logic: If the selected model (e.g., Claude) is not available (404/502),
     // we gracefully fall back to Kimi K2.6 so the application never crashes.
