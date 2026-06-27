@@ -77,7 +77,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="h-full flex flex-col lg:flex-row gap-4 lg:gap-6 relative">
+    <div className="h-full min-h-full pb-3 pr-2 flex flex-col lg:flex-row gap-4 lg:gap-6 relative">
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-white border-[4px] border-ink rounded-3xl shadow-[8px_8px_0_#1A1A2E] overflow-hidden relative z-10">
         {stats && (

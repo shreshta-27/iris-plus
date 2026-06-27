@@ -16,7 +16,7 @@ export default function Sidebar({ user, onLogout, isOpen, onClose }) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-[300px] bg-white border-[4px] border-ink rounded-[2rem] shadow-[8px_8px_0_#1A1A2E] flex flex-col h-[calc(100vh-16px)] md:h-[calc(100vh-32px)] relative overflow-hidden">
+    <aside className="w-[300px] bg-white border-[4px] border-ink rounded-[2rem] shadow-[8px_8px_0_#1A1A2E] flex flex-col h-[calc(100vh-32px)] md:h-[calc(100vh-48px)] relative overflow-hidden">
       <div className="p-6 border-b-[4px] border-ink flex justify-between items-center bg-cream shrink-0">
         <Link href="/" className="flex flex-col group">
           <span className="text-3xl font-black text-ink flex items-center gap-2 group-hover:scale-105 transition-transform">
