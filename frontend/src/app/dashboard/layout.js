@@ -8,13 +8,18 @@ import BudgetMeter from '@/components/ui/BudgetMeter';
 import { useBudget } from '@/hooks/useBudget';
 import { RiMenuLine, RiWallet3Line } from 'react-icons/ri';
 
+import { RiMenuLine } from 'react-icons/ri';
+
 export default function DashboardLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { budget: stats, fetchBudget: fetchStats } = useBudget('demo-session-id');
+  // Use the actual user ID for the session to ensure isolation and personalization,
+  // falling back to 'demo-session-id' only if the user hasn't loaded yet.
+  const sessionId = user?._id || user?.id || 'demo-session-id';
+  const { budget: stats, fetchBudget: fetchStats } = useBudget(sessionId);
 
   useEffect(() => {
     api.get('/api/auth/me')
@@ -23,7 +28,7 @@ export default function DashboardLayout({ children }) {
         fetchStats();
       })
       .catch((err) => {
-        console.error('Auth check failed:', err);
+        console.warn('Auth check failed:', err.message);
         router.push('/login');
       })
       .finally(() => setLoading(false));
@@ -76,7 +81,7 @@ export default function DashboardLayout({ children }) {
           animate={{ x: sidebarOpen ? 0 : undefined }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
-          <Sidebar user={user} onLogout={handleLogout} onClose={() => setSidebarOpen(false)} />
+          <Sidebar user={user} onLogout={handleLogout} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         </motion.div>
       </AnimatePresence>
       

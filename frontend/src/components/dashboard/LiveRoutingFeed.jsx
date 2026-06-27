@@ -1,6 +1,7 @@
 'use client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RiTimeLine } from 'react-icons/ri';
+import { RiTimeLine, RiRouteLine, RiShieldLine, RiCoinLine, RiBrainLine, RiErrorWarningLine } from 'react-icons/ri';
+import { TIER_COLORS } from '@/lib/constants';
 
 const getTierColor = (tier) => {
   if (tier === 'Haiku 4.5') return 'bg-sunny';
@@ -23,36 +24,72 @@ export default function LiveRoutingFeed({ events }) {
   return (
     <div className="space-y-4 pb-4">
       <AnimatePresence initial={false}>
-        {events.map((event) => (
-          <motion.div
-            key={event.id}
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            className={`p-4 bg-white border-[3px] border-ink rounded-2xl shadow-[4px_4px_0_#1A1A2E] relative overflow-hidden`}
-          >
-            {/* Colored side accent (rounded) */}
-            <div className={`absolute left-0 top-0 bottom-0 w-3 border-r-[3px] border-ink ${getTierColor(event.modelDisplayName || event.tier)}`} />
-            
-            <div className="pl-3">
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-xs font-black uppercase text-ink/50 tracking-widest">
-                  {new Date(event.timestamp).toLocaleTimeString()}
-                </span>
-                <span className="font-mono font-bold text-[10px] bg-cream border-[2px] border-ink px-2 py-0.5 rounded-full text-ink">
-                  ${Number(event.cost).toFixed(4)}
-                </span>
-              </div>
+        {events.map((event, i) => {
+          const isBlocked = event.type === 'injection_blocked';
+          const tierStyle = TIER_COLORS[event.tier] || TIER_COLORS.simple;
+
+          if (isBlocked) {
+            return (
+              <motion.div
+                key={event.id || i}
+                initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                className="p-4 bg-coral/10 border-[3px] border-coral rounded-2xl shadow-[4px_4px_0_#FF6B6B] relative overflow-hidden"
+              >
+                <div className="pl-3">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-xs font-black uppercase text-coral tracking-widest flex items-center gap-2">
+                      <RiShieldLine className="w-4 h-4" /> PIGuard Blocked
+                    </span>
+                    <span className="text-coral font-bold text-[10px]">Cost: $0.00</span>
+                  </div>
+                  <h4 className="font-bold text-ink/70 text-sm mb-2 break-words truncate">"{event.message || event.promptExcerpt}"</h4>
+                </div>
+              </motion.div>
+            );
+          }
+
+          return (
+            <motion.div
+              key={event.id || i}
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              className={`p-4 bg-white border-[3px] border-ink rounded-2xl shadow-[4px_4px_0_#1A1A2E] relative overflow-hidden`}
+            >
+              {/* Colored side accent (rounded) */}
+              <div className={`absolute left-0 top-0 bottom-0 w-3 border-r-[3px] border-ink ${getTierColor(event.modelDisplayName || event.tier)}`} />
               
-              <h4 className="font-bold text-ink text-sm mb-2 break-words">"{event.promptExcerpt}"</h4>
-              
-              <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t-[2px] border-ink/10">
-                <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 border-[2px] border-ink rounded-full ${getTierColor(event.modelDisplayName || event.tier)}`}>
-                  {event.modelDisplayName || event.tier}
-                </span>
-                <span className="text-[10px] font-bold text-ink/70 px-2 py-1 bg-cream border-[2px] border-transparent rounded-full flex-1 truncate" title={event.reason}>
-                  {event.reason}
-                </span>
+              <div className="pl-3">
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-xs font-black uppercase text-ink/50 tracking-widest">
+                    {new Date(event.timestamp).toLocaleTimeString()}
+                  </span>
+                  <span className="font-mono font-bold text-[10px] bg-cream border-[2px] border-ink px-2 py-0.5 rounded-full text-ink">
+                    ${Number(event.cost?.thisCallFormatted?.replace('$', '') || event.cost || 0).toFixed(4)}
+                  </span>
+                </div>
+                
+                <h4 className="font-bold text-ink text-sm mb-2 break-words">"{event.promptExcerpt}"</h4>
+                
+                <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t-[2px] border-ink/10">
+                  <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 border-[2px] border-ink rounded-full flex items-center gap-1 ${getTierColor(event.modelDisplayName || event.tier)}`}>
+                    <RiBrainLine className="w-3 h-3" /> {event.modelDisplayName || event.tier}
+                  </span>
+                  <span className="text-[10px] font-bold text-ink/70 px-2 py-1 bg-cream border-[2px] border-transparent rounded-full flex-1 truncate" title={event.reason}>
+                    {event.reason}
+                  </span>
+                </div>
+                
+                {event.costSavings?.savedPercent > 0 && (
+                  <div className="mt-2 text-[10px] font-bold text-mint bg-mint/10 border-2 border-mint px-2 py-1 rounded-full w-fit">
+                    Saved {event.costSavings.savedPercent}% vs Sonnet 4.6
+                  </div>
+                )}
               </div>
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
             </div>
           </motion.div>
         ))}

@@ -8,29 +8,52 @@ export async function callOtari({
   useWebSearch = false,
   sessionId,
 }) {
-  // The Otari proxy crashes (502) if it receives consecutive user roles or max_tokens.
-  // We merge the system prompt directly into the final user message to bypass this limitation.
-  let formattedMessages = [...messages];
-  if (systemPrompt && formattedMessages.length > 0) {
-    const lastMsgIdx = formattedMessages.length - 1;
-    formattedMessages[lastMsgIdx] = {
-      ...formattedMessages[lastMsgIdx],
-      content: `[SYSTEM: ${systemPrompt}]\n\n${formattedMessages[lastMsgIdx].content}`
-    };
+  const formattedMessages = [];
+  
+  if (systemPrompt) {
+    formattedMessages.push({ role: 'system', content: systemPrompt });
+  }
+  
+  for (const msg of messages) {
+    formattedMessages.push({
+      role: msg.role,
+      content: msg.content,
+    });
   }
 
   const requestBody = {
-    // The Otari proxy ONLY supports Kimi right now (Claude returns 404).
-    // We pass Kimi to the API to make it functional, but we return the original model string 
-    // from this function so the frontend Live Routing still correctly displays what the 
-    // Smart Router actually selected!
-    model: 'mzai:moonshotai/Kimi-K2.6',
+    model: model,
     messages: formattedMessages,
+    extra_body: {
+      client_name: sessionId || 'default-session',
+      guardrails: [
+        { profile: 'prompt-injection', mode: guardrailMode }
+      ]
+    }
   };
 
-  // Tools parameter removed because Otari API returns 403 Forbidden when it is included
+  if (useWebSearch) {
+    requestBody.tools = [{ type: 'otari_web_search' }];
+  }
 
-  const response = await otariClient.chat.completions.create(requestBody);
+  let response;
+  try {
+    response = await otariClient.chat.completions.create(requestBody);
+  } catch (err) {
+    // Fallback logic: If the selected model (e.g., Claude) is not available (404/502),
+    // we gracefully fall back to Kimi K2.6 so the application never crashes.
+    if (model !== 'mzai:moonshotai/Kimi-K2.6' && (err.status === 404 || err.status === 502 || err.message?.includes('not found') || err.message?.includes('model'))) {
+      console.warn(`Model ${model} failed, falling back to Kimi K2.6:`, err.message);
+      const fallbackBody = {
+        ...requestBody,
+        model: 'mzai:moonshotai/Kimi-K2.6',
+      };
+      response = await otariClient.chat.completions.create(fallbackBody);
+      model = 'mzai:moonshotai/Kimi-K2.6';
+    } else {
+      throw err;
+    }
+  }
 
   const inputTokens = response.usage?.prompt_tokens || 0;
   const outputTokens = response.usage?.completion_tokens || 0;
@@ -49,6 +72,15 @@ export async function callOtari({
     answer = response.choices?.[0]?.message?.content || '';
   }
 
+  // Retrieve guardrails verdict from headers if available
+  let guardrailVerdict = null;
+  if (response.headers) {
+    const headersObj = typeof response.headers.get === 'function' 
+      ? response.headers 
+      : new Headers(response.headers);
+    guardrailVerdict = headersObj.get('x-otari-guardrails');
+  }
+
   return {
     answer,
     model,
@@ -56,5 +88,6 @@ export async function callOtari({
     outputTokens,
     cost,
     usage: response.usage,
+    guardrailVerdict,
   };
 }

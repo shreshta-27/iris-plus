@@ -1,16 +1,18 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { RiRobot2Line, RiBookOpenLine, RiRocketLine, RiLogoutBoxLine, RiCloseLine } from 'react-icons/ri';
+import { RiRobot2Line, RiBookOpenLine, RiRocketLine, RiLogoutBoxLine, RiBarChartBoxLine, RiShieldCheckLine, RiCloseLine } from 'react-icons/ri';
 import { motion } from 'framer-motion';
 
 const navItems = [
   { href: '/dashboard', icon: RiRobot2Line, label: 'AI Assistant', color: 'iris-purple' },
   { href: '/dashboard/quiz', icon: RiBookOpenLine, label: 'Quiz Forge', color: 'sunny' },
   { href: '/dashboard/career', icon: RiRocketLine, label: 'Career Sim', color: 'peach' },
+  { href: '/dashboard/analytics', icon: RiBarChartBoxLine, label: 'Analytics', color: 'mint' },
+  { href: '/dashboard/security', icon: RiShieldCheckLine, label: 'Security', color: 'coral' },
 ];
 
-export default function Sidebar({ user, onLogout, onClose }) {
+export default function Sidebar({ user, onLogout, isOpen, onClose }) {
   const pathname = usePathname();
 
   return (

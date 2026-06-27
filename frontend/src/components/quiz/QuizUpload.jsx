@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
-import { RiUploadCloud2Line, RiLoader4Line, RiBookOpenLine } from 'react-icons/ri';
+import { motion } from 'framer-motion';
+import { RiUploadCloud2Line, RiLoader4Line, RiBookOpenLine, RiCheckLine, RiErrorWarningLine } from 'react-icons/ri';
 
 export default function QuizUpload({ onGenerate, loading }) {
   const [topic, setTopic] = useState('');
@@ -8,17 +9,51 @@ export default function QuizUpload({ onGenerate, loading }) {
   const [difficulty, setDifficulty] = useState('medium');
   const [numQuestions, setNumQuestions] = useState(5);
   const [mode, setMode] = useState('topic');
+  const [fileLoading, setFileLoading] = useState(false);
+  const [fileName, setFileName] = useState('');
 
   const handleSubmit = () => {
     if (mode === 'topic' && !topic.trim()) return;
-    if (mode === 'notes' && !noteContent.trim()) return;
+    if ((mode === 'notes' || mode === 'pdf') && !noteContent.trim()) return;
 
     onGenerate({
-      topic: mode === 'topic' ? topic : '',
-      noteContent: mode === 'notes' ? noteContent : '',
+      topic: mode === 'topic' ? topic : (fileName ? `Notes from ${fileName}` : ''),
+      noteContent: (mode === 'notes' || mode === 'pdf') ? noteContent : '',
       difficulty,
       numQuestions,
     });
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setFileName(file.name);
+    setFileLoading(true);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/upload/pdf', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('iris_token')}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error('Upload failed');
+
+      const data = await response.json();
+      setNoteContent(data.text);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to parse PDF.');
+      setFileName('');
+    } finally {
+      setFileLoading(false);
+    }
   };
 
   return (
@@ -30,8 +65,8 @@ export default function QuizUpload({ onGenerate, loading }) {
         Configure Quiz
       </h3>
 
-      <div className="flex gap-4 mb-8 bg-cream p-3 border-[4px] border-ink inline-flex shadow-[inset_4px_4px_0_rgba(0,0,0,0.05)] rounded-[2rem]">
-        {['topic', 'notes'].map(m => (
+      <div className="flex gap-2 mb-4">
+        {['topic', 'notes', 'pdf'].map(m => (
           <button
             key={m}
             onClick={() => setMode(m)}
@@ -41,14 +76,14 @@ export default function QuizUpload({ onGenerate, loading }) {
                 : 'bg-transparent border-transparent text-ink/60 hover:text-ink'
             }`}
           >
-            {m === 'topic' ? 'Topic' : 'Notes'}
+            {m === 'topic' ? 'Enter Topic' : m === 'notes' ? 'Paste Notes' : 'Upload PDF'}
           </button>
         ))}
       </div>
 
       <div className="mb-8">
         <label className="block text-sm font-black text-ink uppercase tracking-widest mb-3 ml-2">
-          {mode === 'topic' ? 'Subject / Topic' : 'Study Notes Content'}
+          {mode === 'topic' ? 'Subject / Topic' : mode === 'pdf' ? 'Upload PDF Document' : 'Study Notes Content'}
         </label>
         {mode === 'topic' ? (
           <input
@@ -58,6 +93,29 @@ export default function QuizUpload({ onGenerate, loading }) {
             placeholder="e.g., Photosynthesis, Data Structures, WW2..."
             className="input-brutal text-lg p-5"
           />
+        ) : mode === 'pdf' ? (
+          <div className="mb-4">
+            <label className="border-[3px] border-dashed border-ink hover:border-iris-purple bg-cream p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all rounded-2xl shadow-[4px_4px_0_#1A1A2E] hover:translate-y-[-2px] hover:shadow-[6px_6px_0_#1A1A2E]">
+              {fileLoading ? (
+                <RiLoader4Line className="w-8 h-8 text-iris-purple animate-spin" />
+              ) : (
+                <RiUploadCloud2Line className="w-8 h-8 text-ink/40" />
+              )}
+              <span className="text-sm font-bold text-ink">
+                {fileLoading ? 'Extracting text...' : fileName ? fileName : 'Click or drag PDF to upload'}
+              </span>
+              <input 
+                type="file" 
+                accept=".pdf" 
+                className="hidden" 
+                onChange={handleFileUpload} 
+                disabled={fileLoading}
+              />
+            </label>
+            {fileName && !fileLoading && (
+              <p className="text-[10px] text-mint font-bold uppercase tracking-widest mt-2 ml-2">Text extracted successfully! Ready to generate quiz.</p>
+            )}
+          </div>
         ) : (
           <textarea
             value={noteContent}

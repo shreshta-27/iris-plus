@@ -13,8 +13,27 @@ export default function DashboardPage() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const sessionId = 'demo-session-id';
-  const { routingEvents, isConnected } = useSocket(sessionId);
+  const [user, setUser] = useState(null);
+  
+  // Load state from sessionStorage on mount
+  useEffect(() => {
+    api.get('/api/auth/me').then(data => setUser(data.user)).catch(() => {});
+    const savedMsgs = sessionStorage.getItem('iris_chat_messages');
+    if (savedMsgs) {
+      try { setMessages(JSON.parse(savedMsgs)); } catch (e) {}
+    }
+  }, []);
+
+  // Save state to sessionStorage on change
+  useEffect(() => {
+    if (messages.length > 0) {
+      sessionStorage.setItem('iris_chat_messages', JSON.stringify(messages));
+    }
+  }, [messages]);
+
+  // Personalized session for budget/routing isolation
+  const sessionId = user?._id || user?.id || 'demo-session-id';
+  const { socket, routingEvents, isConnected } = useSocket(sessionId);
   const { budget: stats, fetchBudget: fetchStats } = useBudget(sessionId);
 
   const handleSend = async (text) => {

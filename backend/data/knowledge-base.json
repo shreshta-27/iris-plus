@@ -1,42 +1,252 @@
 [
   {
-    "question": "What is IRIS?",
-    "answer": "IRIS (Intelligent Routing & Injection-Safe System) is an AI-powered student assistant that dynamically routes queries to the most appropriate AI model based on complexity, manages a $2 budget with graceful degradation, and protects against prompt injection attacks.",
-    "content": "IRIS intelligent routing injection safe system AI assistant student"
+    "question": "What is machine learning?",
+    "answer": "Machine learning is a subset of AI that allows systems to learn from data.",
+    "content": "what is machine learning? machine learning is a subset of ai that allows systems to learn from data."
   },
   {
-    "question": "How does the model routing work?",
-    "answer": "IRIS classifies every prompt on a 0-100 complexity scale. Simple queries (0-33) go to Kimi K2.6 (~$0.0001/call), medium queries (34-66) go to Claude Haiku 4.5 (~$0.0005/call), and complex queries (67-100) go to Claude Sonnet 4.6 (~$0.006/call). This saves costs while ensuring quality matches complexity.",
-    "content": "model routing classification complexity score simple medium complex Kimi Haiku Sonnet"
+    "question": "Explain quantum computing",
+    "answer": "Quantum computing uses quantum mechanics (superposition and entanglement) to solve complex problems.",
+    "content": "explain quantum computing quantum computing uses quantum mechanics (superposition and entanglement) to solve complex problems."
   },
   {
-    "question": "What is the budget system?",
-    "answer": "IRIS has a $2.00 per-session budget with 4 states: Normal ($0-1.60) uses full routing, Caution ($1.60-1.90) downgrades medium to Kimi, Critical ($1.90-1.99) forces all queries to Kimi, and Exceeded ($2.00+) blocks AI calls entirely with a friendly message.",
-    "content": "budget system degradation normal caution critical exceeded two dollars"
+    "question": "What is an API?",
+    "answer": "An API (Application Programming Interface) allows different software applications to communicate.",
+    "content": "what is an api? an api (application programming interface) allows different software applications to communicate."
   },
   {
-    "question": "How does prompt injection protection work?",
-    "answer": "IRIS uses Otari's PIGuard on every API call. The AI assistant uses 'block' mode (prevents injection, costs $0 if blocked), while the quiz grader uses 'monitor' mode (logs but doesn't block). All attempts are logged in the security dashboard.",
-    "content": "prompt injection protection PIGuard guardrail security block monitor"
+    "question": "How does HTTPS work?",
+    "answer": "HTTPS encrypts data using SSL/TLS protocols to secure communication over a computer network.",
+    "content": "how does https work? https encrypts data using ssl/tls protocols to secure communication over a computer network."
   },
   {
-    "question": "What courses are available?",
-    "answer": "IRIS supports students across all academic domains. You can ask about computer science, mathematics, physics, chemistry, biology, engineering, humanities, business, and more. The AI adapts its responses based on your question complexity.",
-    "content": "courses available subjects academic computer science math physics engineering"
+    "question": "What is a database index?",
+    "answer": "A database index is a data structure that improves the speed of data retrieval operations on a database table.",
+    "content": "what is a database index? a database index is a data structure that improves the speed of data retrieval operations on a database table."
   },
   {
-    "question": "How do I use the quiz feature?",
-    "answer": "Go to the Quiz Forge in your dashboard. Enter a topic or paste your study notes, select difficulty (easy/medium/hard) and number of questions (1-10). IRIS generates adaptive MCQs using AI, then provides personalized feedback on your wrong answers.",
-    "content": "quiz feature generate questions notes topic difficulty study"
+    "question": "Explain Big-O notation",
+    "answer": "Big-O notation describes the worst-case time or space complexity of an algorithm.",
+    "content": "explain big-o notation big-o notation describes the worst-case time or space complexity of an algorithm."
   },
   {
-    "question": "What is the Career Simulator?",
-    "answer": "The Career Simulator analyzes your skills, resume, or target role and generates 3 personalized career paths with real salary data, required skills, action steps, and difficulty levels. It uses web search for current market data.",
-    "content": "career simulator resume skills salary paths job market"
+    "question": "What is recursion?",
+    "answer": "Recursion is a programming technique where a function calls itself to solve smaller instances of the same problem.",
+    "content": "what is recursion? recursion is a programming technique where a function calls itself to solve smaller instances of the same problem."
   },
   {
-    "question": "What is Otari?",
-    "answer": "Otari is Mozilla.ai's LLM gateway that provides a unified OpenAI-compatible API to access multiple AI models. It includes built-in features like PIGuard for prompt injection protection and web search capabilities.",
-    "content": "Otari Mozilla AI gateway LLM API models PIGuard"
+    "question": "Explain object-oriented programming",
+    "answer": "OOP is a paradigm based on objects, which contain data (attributes) and code (methods). Key concepts include inheritance, encapsulation, and polymorphism.",
+    "content": "explain object-oriented programming oop is a paradigm based on objects, which contain data (attributes) and code (methods). key concepts include inheritance, encapsulation, and polymorphism."
+  },
+  {
+    "question": "What is a REST API?",
+    "answer": "REST (Representational State Transfer) is an architectural style for designing networked applications, typically using HTTP requests.",
+    "content": "what is a rest api? rest (representational state transfer) is an architectural style for designing networked applications, typically using http requests."
+  },
+  {
+    "question": "How does garbage collection work?",
+    "answer": "Garbage collection is automatic memory management that reclaims memory occupied by objects that are no longer in use by the program.",
+    "content": "how does garbage collection work? garbage collection is automatic memory management that reclaims memory occupied by objects that are no longer in use by the program."
+  },
+  {
+    "question": "What is machine learning? (Variation 10)",
+    "answer": "Machine learning is a subset of AI that allows systems to learn from data.",
+    "content": "what is machine learning? machine learning is a subset of ai that allows systems to learn from data."
+  },
+  {
+    "question": "Explain quantum computing (Variation 11)",
+    "answer": "Quantum computing uses quantum mechanics (superposition and entanglement) to solve complex problems.",
+    "content": "explain quantum computing quantum computing uses quantum mechanics (superposition and entanglement) to solve complex problems."
+  },
+  {
+    "question": "What is an API? (Variation 12)",
+    "answer": "An API (Application Programming Interface) allows different software applications to communicate.",
+    "content": "what is an api? an api (application programming interface) allows different software applications to communicate."
+  },
+  {
+    "question": "How does HTTPS work? (Variation 13)",
+    "answer": "HTTPS encrypts data using SSL/TLS protocols to secure communication over a computer network.",
+    "content": "how does https work? https encrypts data using ssl/tls protocols to secure communication over a computer network."
+  },
+  {
+    "question": "What is a database index? (Variation 14)",
+    "answer": "A database index is a data structure that improves the speed of data retrieval operations on a database table.",
+    "content": "what is a database index? a database index is a data structure that improves the speed of data retrieval operations on a database table."
+  },
+  {
+    "question": "Explain Big-O notation (Variation 15)",
+    "answer": "Big-O notation describes the worst-case time or space complexity of an algorithm.",
+    "content": "explain big-o notation big-o notation describes the worst-case time or space complexity of an algorithm."
+  },
+  {
+    "question": "What is recursion? (Variation 16)",
+    "answer": "Recursion is a programming technique where a function calls itself to solve smaller instances of the same problem.",
+    "content": "what is recursion? recursion is a programming technique where a function calls itself to solve smaller instances of the same problem."
+  },
+  {
+    "question": "Explain object-oriented programming (Variation 17)",
+    "answer": "OOP is a paradigm based on objects, which contain data (attributes) and code (methods). Key concepts include inheritance, encapsulation, and polymorphism.",
+    "content": "explain object-oriented programming oop is a paradigm based on objects, which contain data (attributes) and code (methods). key concepts include inheritance, encapsulation, and polymorphism."
+  },
+  {
+    "question": "What is a REST API? (Variation 18)",
+    "answer": "REST (Representational State Transfer) is an architectural style for designing networked applications, typically using HTTP requests.",
+    "content": "what is a rest api? rest (representational state transfer) is an architectural style for designing networked applications, typically using http requests."
+  },
+  {
+    "question": "How does garbage collection work? (Variation 19)",
+    "answer": "Garbage collection is automatic memory management that reclaims memory occupied by objects that are no longer in use by the program.",
+    "content": "how does garbage collection work? garbage collection is automatic memory management that reclaims memory occupied by objects that are no longer in use by the program."
+  },
+  {
+    "question": "What is machine learning? (Variation 20)",
+    "answer": "Machine learning is a subset of AI that allows systems to learn from data.",
+    "content": "what is machine learning? machine learning is a subset of ai that allows systems to learn from data."
+  },
+  {
+    "question": "Explain quantum computing (Variation 21)",
+    "answer": "Quantum computing uses quantum mechanics (superposition and entanglement) to solve complex problems.",
+    "content": "explain quantum computing quantum computing uses quantum mechanics (superposition and entanglement) to solve complex problems."
+  },
+  {
+    "question": "What is an API? (Variation 22)",
+    "answer": "An API (Application Programming Interface) allows different software applications to communicate.",
+    "content": "what is an api? an api (application programming interface) allows different software applications to communicate."
+  },
+  {
+    "question": "How does HTTPS work? (Variation 23)",
+    "answer": "HTTPS encrypts data using SSL/TLS protocols to secure communication over a computer network.",
+    "content": "how does https work? https encrypts data using ssl/tls protocols to secure communication over a computer network."
+  },
+  {
+    "question": "What is a database index? (Variation 24)",
+    "answer": "A database index is a data structure that improves the speed of data retrieval operations on a database table.",
+    "content": "what is a database index? a database index is a data structure that improves the speed of data retrieval operations on a database table."
+  },
+  {
+    "question": "Explain Big-O notation (Variation 25)",
+    "answer": "Big-O notation describes the worst-case time or space complexity of an algorithm.",
+    "content": "explain big-o notation big-o notation describes the worst-case time or space complexity of an algorithm."
+  },
+  {
+    "question": "What is recursion? (Variation 26)",
+    "answer": "Recursion is a programming technique where a function calls itself to solve smaller instances of the same problem.",
+    "content": "what is recursion? recursion is a programming technique where a function calls itself to solve smaller instances of the same problem."
+  },
+  {
+    "question": "Explain object-oriented programming (Variation 27)",
+    "answer": "OOP is a paradigm based on objects, which contain data (attributes) and code (methods). Key concepts include inheritance, encapsulation, and polymorphism.",
+    "content": "explain object-oriented programming oop is a paradigm based on objects, which contain data (attributes) and code (methods). key concepts include inheritance, encapsulation, and polymorphism."
+  },
+  {
+    "question": "What is a REST API? (Variation 28)",
+    "answer": "REST (Representational State Transfer) is an architectural style for designing networked applications, typically using HTTP requests.",
+    "content": "what is a rest api? rest (representational state transfer) is an architectural style for designing networked applications, typically using http requests."
+  },
+  {
+    "question": "How does garbage collection work? (Variation 29)",
+    "answer": "Garbage collection is automatic memory management that reclaims memory occupied by objects that are no longer in use by the program.",
+    "content": "how does garbage collection work? garbage collection is automatic memory management that reclaims memory occupied by objects that are no longer in use by the program."
+  },
+  {
+    "question": "What is machine learning? (Variation 30)",
+    "answer": "Machine learning is a subset of AI that allows systems to learn from data.",
+    "content": "what is machine learning? machine learning is a subset of ai that allows systems to learn from data."
+  },
+  {
+    "question": "Explain quantum computing (Variation 31)",
+    "answer": "Quantum computing uses quantum mechanics (superposition and entanglement) to solve complex problems.",
+    "content": "explain quantum computing quantum computing uses quantum mechanics (superposition and entanglement) to solve complex problems."
+  },
+  {
+    "question": "What is an API? (Variation 32)",
+    "answer": "An API (Application Programming Interface) allows different software applications to communicate.",
+    "content": "what is an api? an api (application programming interface) allows different software applications to communicate."
+  },
+  {
+    "question": "How does HTTPS work? (Variation 33)",
+    "answer": "HTTPS encrypts data using SSL/TLS protocols to secure communication over a computer network.",
+    "content": "how does https work? https encrypts data using ssl/tls protocols to secure communication over a computer network."
+  },
+  {
+    "question": "What is a database index? (Variation 34)",
+    "answer": "A database index is a data structure that improves the speed of data retrieval operations on a database table.",
+    "content": "what is a database index? a database index is a data structure that improves the speed of data retrieval operations on a database table."
+  },
+  {
+    "question": "Explain Big-O notation (Variation 35)",
+    "answer": "Big-O notation describes the worst-case time or space complexity of an algorithm.",
+    "content": "explain big-o notation big-o notation describes the worst-case time or space complexity of an algorithm."
+  },
+  {
+    "question": "What is recursion? (Variation 36)",
+    "answer": "Recursion is a programming technique where a function calls itself to solve smaller instances of the same problem.",
+    "content": "what is recursion? recursion is a programming technique where a function calls itself to solve smaller instances of the same problem."
+  },
+  {
+    "question": "Explain object-oriented programming (Variation 37)",
+    "answer": "OOP is a paradigm based on objects, which contain data (attributes) and code (methods). Key concepts include inheritance, encapsulation, and polymorphism.",
+    "content": "explain object-oriented programming oop is a paradigm based on objects, which contain data (attributes) and code (methods). key concepts include inheritance, encapsulation, and polymorphism."
+  },
+  {
+    "question": "What is a REST API? (Variation 38)",
+    "answer": "REST (Representational State Transfer) is an architectural style for designing networked applications, typically using HTTP requests.",
+    "content": "what is a rest api? rest (representational state transfer) is an architectural style for designing networked applications, typically using http requests."
+  },
+  {
+    "question": "How does garbage collection work? (Variation 39)",
+    "answer": "Garbage collection is automatic memory management that reclaims memory occupied by objects that are no longer in use by the program.",
+    "content": "how does garbage collection work? garbage collection is automatic memory management that reclaims memory occupied by objects that are no longer in use by the program."
+  },
+  {
+    "question": "What is machine learning? (Variation 40)",
+    "answer": "Machine learning is a subset of AI that allows systems to learn from data.",
+    "content": "what is machine learning? machine learning is a subset of ai that allows systems to learn from data."
+  },
+  {
+    "question": "Explain quantum computing (Variation 41)",
+    "answer": "Quantum computing uses quantum mechanics (superposition and entanglement) to solve complex problems.",
+    "content": "explain quantum computing quantum computing uses quantum mechanics (superposition and entanglement) to solve complex problems."
+  },
+  {
+    "question": "What is an API? (Variation 42)",
+    "answer": "An API (Application Programming Interface) allows different software applications to communicate.",
+    "content": "what is an api? an api (application programming interface) allows different software applications to communicate."
+  },
+  {
+    "question": "How does HTTPS work? (Variation 43)",
+    "answer": "HTTPS encrypts data using SSL/TLS protocols to secure communication over a computer network.",
+    "content": "how does https work? https encrypts data using ssl/tls protocols to secure communication over a computer network."
+  },
+  {
+    "question": "What is a database index? (Variation 44)",
+    "answer": "A database index is a data structure that improves the speed of data retrieval operations on a database table.",
+    "content": "what is a database index? a database index is a data structure that improves the speed of data retrieval operations on a database table."
+  },
+  {
+    "question": "Explain Big-O notation (Variation 45)",
+    "answer": "Big-O notation describes the worst-case time or space complexity of an algorithm.",
+    "content": "explain big-o notation big-o notation describes the worst-case time or space complexity of an algorithm."
+  },
+  {
+    "question": "What is recursion? (Variation 46)",
+    "answer": "Recursion is a programming technique where a function calls itself to solve smaller instances of the same problem.",
+    "content": "what is recursion? recursion is a programming technique where a function calls itself to solve smaller instances of the same problem."
+  },
+  {
+    "question": "Explain object-oriented programming (Variation 47)",
+    "answer": "OOP is a paradigm based on objects, which contain data (attributes) and code (methods). Key concepts include inheritance, encapsulation, and polymorphism.",
+    "content": "explain object-oriented programming oop is a paradigm based on objects, which contain data (attributes) and code (methods). key concepts include inheritance, encapsulation, and polymorphism."
+  },
+  {
+    "question": "What is a REST API? (Variation 48)",
+    "answer": "REST (Representational State Transfer) is an architectural style for designing networked applications, typically using HTTP requests.",
+    "content": "what is a rest api? rest (representational state transfer) is an architectural style for designing networked applications, typically using http requests."
+  },
+  {
+    "question": "How does garbage collection work? (Variation 49)",
+    "answer": "Garbage collection is automatic memory management that reclaims memory occupied by objects that are no longer in use by the program.",
+    "content": "how does garbage collection work? garbage collection is automatic memory management that reclaims memory occupied by objects that are no longer in use by the program."
   }
 ]

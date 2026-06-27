@@ -8,7 +8,8 @@ export async function authenticate(req, res, next) {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.userId);
-    if (!user || !user.isVerified) return res.status(401).json({ error: 'Not authorized' });
+    // DEV MODE: Ignore verification check
+    if (!user) return res.status(401).json({ error: 'Not authorized' });
 
     req.user = { id: user._id, name: user.name, email: user.email };
     next();

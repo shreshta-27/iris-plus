@@ -13,17 +13,50 @@ try {
 }
 
 const responseCache = new Map();
-const CACHE_TTL_MS = 10 * 60 * 1000;
+const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
 
 function normalizeQuery(text) {
   return text.toLowerCase().trim().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ');
 }
 
-function tokenOverlap(a, b) {
-  const tokensA = new Set(normalizeQuery(a).split(' '));
-  const tokensB = new Set(normalizeQuery(b).split(' '));
-  const intersection = [...tokensA].filter(t => tokensB.has(t) && t.length > 3);
-  return intersection.length / Math.max(tokensA.size, tokensB.size);
+const SYNONYMS = {
+  'iris': ['ai', 'assistant', 'system', 'bot', 'tool', 'platform'],
+  'budget': ['cost', 'money', 'price', 'tokens', 'spent'],
+  'route': ['choose', 'select', 'pick', 'decide', 'model'],
+  'injection': ['hack', 'security', 'bypass', 'jailbreak', 'piguard'],
+};
+
+function expandSynonyms(word) {
+  const result = [word];
+  for (const [key, syns] of Object.entries(SYNONYMS)) {
+    if (key === word) result.push(...syns);
+    if (syns.includes(word)) { result.push(key); result.push(...syns); }
+  }
+  return [...new Set(result)];
+}
+
+function tokenOverlap(queryStr, targetStr) {
+  const queryTokens = new Set(normalizeQuery(queryStr).split(' '));
+  const targetTokens = normalizeQuery(targetStr).split(' ');
+  
+  let matchScore = 0;
+  const uniqueTargetTokens = new Set(targetTokens);
+
+  for (const q of queryTokens) {
+    if (q.length < 3) continue;
+    const expanded = expandSynonyms(q);
+    
+    // Check if any expanded synonym exists in the target
+    if (expanded.some(syn => uniqueTargetTokens.has(syn))) {
+      // Weight domain-specific terms higher (length heuristic)
+      matchScore += q.length > 5 ? 1.5 : 1.0;
+    }
+  }
+  
+  const validQueryTokens = [...queryTokens].filter(t => t.length >= 3).length;
+  if (validQueryTokens === 0) return 0;
+  
+  return matchScore / Math.max(validQueryTokens, uniqueTargetTokens.size * 0.7);
 }
 
 export function searchKnowledgeBase(query) {

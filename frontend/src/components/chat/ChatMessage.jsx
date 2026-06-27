@@ -1,4 +1,9 @@
 'use client';
+import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/atom-one-dark.css'; // Premium dark mode syntax highlighting
 import RoutingChip from '@/components/ui/RoutingChip';
 import InjectionBadge from '@/components/ui/InjectionBadge';
 import { RiUser3Line, RiRobot2Line } from 'react-icons/ri';
@@ -36,7 +41,7 @@ export default function ChatMessage({ message }) {
           {isUser ? <RiUser3Line className="w-6 h-6" /> : <RiRobot2Line className="w-6 h-6" />}
         </div>
 
-        <div className="flex-1 min-w-0 pt-1">
+        <div className="flex-1 min-w-0 pt-1 group relative">
           <div className="flex items-center gap-3 mb-3 flex-wrap">
             <span className="text-sm font-black text-ink uppercase tracking-widest">
               {isUser ? 'You' : 'IRIS'}
@@ -60,7 +65,7 @@ export default function ChatMessage({ message }) {
           </div>
 
           {!isUser && message.routing && (
-            <div className="mt-6 pt-5 border-t-[3px] border-ink/10">
+            <div className="mt-6 pt-5 border-t-[3px] border-ink/10 flex flex-col gap-3">
               <RoutingChip routing={message.routing} cost={message.cost} />
               {message.routing.reason && (
                 <p className="text-xs font-mono font-bold text-ink/70 mt-3 bg-white p-3 border-[3px] border-ink/20 rounded-xl">

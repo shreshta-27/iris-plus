@@ -9,7 +9,8 @@ export async function analyzeCareer(req, res, next) {
 
     const content = resumeText || `Target role: ${targetRole}. Current skills: ${currentSkills}`;
 
-    const model = getDegradedModel(sessionId, MODELS.COMPLEX) || MODELS.SIMPLE;
+    const baseModel = MODELS.COMPLEX;
+    const model = (await getDegradedModel(sessionId, baseModel)) || MODELS.SIMPLE;
 
     let result;
     try {
@@ -28,15 +29,17 @@ export async function analyzeCareer(req, res, next) {
       result = {
         answer: JSON.stringify({
           paths: [
-            { title: "Software Engineer (Simulated)", timeframe: "12-24 months", salaryRange: "₹8–15 LPA", skills: ["JavaScript", "React"], steps: ["Build projects"], difficulty: "intermediate" },
-            { title: "AI Developer (Simulated)", timeframe: "24-36 months", salaryRange: "₹12–25 LPA", skills: ["Python", "Machine Learning"], steps: ["Learn PyTorch"], difficulty: "advanced" }
+            { title: `${targetRole || "Software Engineer"} (Simulated)`, timeframe: "12-24 months", salaryRange: "₹8–15 LPA", skills: (currentSkills || "JavaScript, React").split(","), steps: ["Build projects", "Apply for internships"], difficulty: "intermediate" },
+            { title: "Systems Architect (Simulated)", timeframe: "24-36 months", salaryRange: "₹12–25 LPA", skills: ["System Design", "Cloud Computing"], steps: ["Learn Docker/Kubernetes"], difficulty: "advanced" }
           ]
         }),
-        cost: 0.01
+        cost: 0.0005,
+        inputTokens: 150,
+        outputTokens: 200
       };
     }
 
-    recordSpend(sessionId, model, result.cost, { tier: 'complex', reason: 'Career analysis + web search' });
+    await recordSpend(sessionId, model, result.cost, { tier: 'complex', reason: 'Career analysis + web search' });
 
     let paths;
     try {
@@ -54,11 +57,13 @@ export async function analyzeCareer(req, res, next) {
       cost: result.cost,
     });
 
+    const budgetStats = await getAllBudgetStats(sessionId);
+
     return res.json({
       reportId: report._id,
       paths,
       routing: { model, tier: 'complex', reason: 'Career analysis with live web search for salary data', webSearchUsed: true },
-      cost: { thisCall: result.cost, ...getAllBudgetStats(sessionId) },
+      cost: { thisCall: result.cost, ...budgetStats },
     });
   } catch (err) {
     next(err);
