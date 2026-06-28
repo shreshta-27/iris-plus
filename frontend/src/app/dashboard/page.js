@@ -13,24 +13,26 @@ export default function DashboardPage() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [socraticMode, setSocraticMode] = useState(false);
+  const [webSearchMode, setWebSearchMode] = useState(false);
 
   const [user, setUser] = useState(null);
   
-  // Load state from sessionStorage on mount
+  // Load state from DB on mount
   useEffect(() => {
-    api.get('/api/auth/me').then(data => setUser(data.user)).catch(() => {});
-    const savedMsgs = sessionStorage.getItem('iris_chat_messages');
-    if (savedMsgs) {
-      try { setMessages(JSON.parse(savedMsgs)); } catch (e) {}
-    }
+    api.get('/api/auth/me').then(data => {
+      setUser(data.user);
+      const sid = data.user?._id || data.user?.id;
+      if (sid) {
+        api.get(`/api/ai/history/${sid}`)
+          .then(res => {
+            if (res.messages && res.messages.length > 0) {
+              setMessages(res.messages);
+            }
+          })
+          .catch(err => console.error('Failed to load history:', err));
+      }
+    }).catch(() => {});
   }, []);
-
-  // Save state to sessionStorage on change
-  useEffect(() => {
-    if (messages.length > 0) {
-      sessionStorage.setItem('iris_chat_messages', JSON.stringify(messages));
-    }
-  }, [messages]);
 
   // Personalized session for budget/routing isolation
   const sessionId = user?._id || user?.id || 'demo-session-id';
@@ -43,7 +45,7 @@ export default function DashboardPage() {
     setIsLoading(true);
 
     try {
-      const res = await api.post('/api/ai/chat', { message: text, sessionId, socraticMode });
+      const res = await api.post('/api/ai/chat', { message: text, sessionId, socraticMode, webSearchMode });
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: res.answer,
@@ -88,13 +90,22 @@ export default function DashboardPage() {
            <div className="flex items-center gap-2">
              <h2 className="font-black text-xs md:text-sm uppercase tracking-widest text-ink">IRIS Assistant</h2>
            </div>
-           <button 
-             onClick={() => setSocraticMode(!socraticMode)}
-             className={`px-3 py-1 text-[10px] md:text-xs font-bold uppercase rounded-full border-2 border-ink shadow-[2px_2px_0_#1A1A2E] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0_#1A1A2E] ${socraticMode ? 'bg-mint' : 'bg-gray-100'}`}
-             title="Act as an AI Tutor to guide you without giving direct answers, protecting privacy."
-           >
-             Tutor Mode: {socraticMode ? 'ON' : 'OFF'}
-           </button>
+           <div className="flex items-center gap-2">
+             <button 
+               onClick={() => setWebSearchMode(!webSearchMode)}
+               className={`px-3 py-1 text-[10px] md:text-xs font-bold uppercase rounded-full border-2 border-ink shadow-[2px_2px_0_#1A1A2E] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0_#1A1A2E] ${webSearchMode ? 'bg-iris-purple text-cream' : 'bg-gray-100 text-ink'}`}
+               title="Enable Web Search via Mozilla Otari AI"
+             >
+               Web Search: {webSearchMode ? 'ON' : 'OFF'}
+             </button>
+             <button 
+               onClick={() => setSocraticMode(!socraticMode)}
+               className={`px-3 py-1 text-[10px] md:text-xs font-bold uppercase rounded-full border-2 border-ink shadow-[2px_2px_0_#1A1A2E] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0_#1A1A2E] ${socraticMode ? 'bg-mint' : 'bg-gray-100'}`}
+               title="Act as an AI Tutor to guide you without giving direct answers, protecting privacy."
+             >
+               Tutor Mode: {socraticMode ? 'ON' : 'OFF'}
+             </button>
+           </div>
         </div>
         <ChatWindow messages={messages} isLoading={isLoading} />
         <ChatInput 

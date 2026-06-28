@@ -245,6 +245,13 @@ export default function AvatarChat() {
         canvas?.parentNode?.removeChild(canvas);
       }
       stopLipSync();
+      // Clean up Smallest.ai Web Audio
+      if (currentSourceRef.current) {
+        try { currentSourceRef.current.stop(); } catch (e) {}
+      }
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close().catch(() => {});
+      }
       if (typeof window !== 'undefined' && window.speechSynthesis) {
         window.speechSynthesis.cancel();
       }
@@ -454,14 +461,89 @@ export default function AvatarChat() {
     setMouthOpen(0);
   }, [setMouthOpen]);
 
-  // ── TTS ──
-  const speakText = useCallback((text, onEnd) => {
-    if (!ttsEnabled || typeof window === 'undefined' || !window.speechSynthesis) {
+  // ── TTS via Smallest.ai (sub-100ms latency) ──
+  const audioContextRef = useRef(null);
+  const currentSourceRef = useRef(null);
+
+  const getAudioContext = useCallback(() => {
+    if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioContextRef.current.state === 'suspended') {
+      audioContextRef.current.resume();
+    }
+    return audioContextRef.current;
+  }, []);
+
+  const speakText = useCallback(async (text, onEnd) => {
+    if (!ttsEnabled || typeof window === 'undefined') {
+      if (onEnd) setTimeout(onEnd, Math.min(text.length * 50, 3000));
+      return;
+    }
+
+    // Stop any currently playing audio
+    if (currentSourceRef.current) {
+      try { currentSourceRef.current.stop(); } catch (e) {}
+      currentSourceRef.current = null;
+    }
+
+    setIsSpeaking(true);
+
+    try {
+      // Call our backend TTS endpoint (Smallest.ai Waves)
+      const response = await fetch('http://localhost:5000/api/tts/synthesize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ text, voiceId: 'emily', speed: 1.0 }),
+      });
+
+      // If TTS service is unavailable, fall back to browser speech synthesis
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        if (errData.fallback) {
+          console.warn('[TTS] Smallest.ai not configured, using browser fallback');
+          fallbackBrowserTTS(text, onEnd);
+          return;
+        }
+        throw new Error(`TTS request failed: ${response.status}`);
+      }
+
+      const latencyMs = response.headers.get('X-TTS-Latency-Ms');
+      console.log(`[TTS] Smallest.ai audio received in ${latencyMs}ms`);
+
+      // Decode the WAV audio and play via Web Audio API
+      const arrayBuffer = await response.arrayBuffer();
+      const ctx = getAudioContext();
+      const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+
+      const source = ctx.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(ctx.destination);
+      currentSourceRef.current = source;
+
+      source.onended = () => {
+        setIsSpeaking(false);
+        currentSourceRef.current = null;
+        if (onEnd) onEnd();
+      };
+
+      source.start(0);
+    } catch (err) {
+      console.warn('[TTS] Fallback activated due to error:', err.message);
+      // Graceful fallback to browser TTS
+      fallbackBrowserTTS(text, onEnd);
+    }
+  }, [ttsEnabled, getAudioContext]);
+
+  // Browser TTS fallback (used when Smallest.ai is not available)
+  const fallbackBrowserTTS = useCallback((text, onEnd) => {
+    if (!window.speechSynthesis) {
+      setIsSpeaking(false);
       if (onEnd) setTimeout(onEnd, Math.min(text.length * 50, 3000));
       return;
     }
     window.speechSynthesis.cancel();
-
     const utt = new SpeechSynthesisUtterance(text);
     utt.rate = 1.0;
     utt.pitch = 1.15;
@@ -483,9 +565,8 @@ export default function AvatarChat() {
     setIsSpeaking(true);
     utt.onend = () => { setIsSpeaking(false); if (onEnd) onEnd(); };
     utt.onerror = () => { setIsSpeaking(false); if (onEnd) onEnd(); };
-
     window.speechSynthesis.speak(utt);
-  }, [ttsEnabled]);
+  }, []);
 
   // ── Pick animation based on text ──
   const getAnimForText = (text) => {
@@ -495,7 +576,7 @@ export default function AvatarChat() {
   };
 
   // ── Handle Send Message ──
-  const handleSend = useCallback(async (text) => {
+  const handleSend = useCallback(async (text, options = {}) => {
     const trimmed = (text || '').trim();
     if (!trimmed || isSending) return;
 
@@ -506,10 +587,26 @@ export default function AvatarChat() {
 
     let reply = '';
     try {
-      const res = await api.post('/api/ai/chat', {
+      // Get real session ID for budget and routing
+      let currentSessionId = 'demo-session-id';
+      try {
+        const authData = await api.get('/api/auth/me');
+        if (authData?.user) {
+          currentSessionId = authData.user._id || authData.user.id;
+        }
+      } catch (e) {
+        console.warn('Could not fetch user session for avatar chat');
+      }
+
+      const payload = {
         message: trimmed,
-        sessionId: 'avatar-session',
-      });
+        sessionId: currentSessionId,
+      };
+      
+      if (options.webSearch) payload.webSearchMode = true;
+      if (options.socratic) payload.socraticMode = true;
+
+      const res = await api.post('/api/ai/chat', payload);
       reply = res.answer || "I'm here to help! Ask me anything.";
     } catch (err) {
       console.error('Avatar chat error:', err);
@@ -594,8 +691,14 @@ export default function AvatarChat() {
   }, [handleSend]);
 
   const toggleTTS = useCallback(() => {
-    if (isSpeaking && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
+    if (isSpeaking) {
+      // Stop Smallest.ai Web Audio
+      if (currentSourceRef.current) {
+        try { currentSourceRef.current.stop(); } catch (e) {}
+        currentSourceRef.current = null;
+      }
+      // Stop browser fallback
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
       stopLipSync();
       setAnimState('Idle');
       setIsSpeaking(false);

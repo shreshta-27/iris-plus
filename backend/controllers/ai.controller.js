@@ -1,7 +1,11 @@
 import { classifyPrompt } from '../services/classifier.service.js';
 import {
-  getBudgetState, getDegradedModel, getBudgetMode,
-  recordSpend, recordBlockedCall, getAllBudgetStats
+  getBudgetMode, 
+  getDegradedModel, 
+  recordBlockedCall, 
+  getAllBudgetStats,
+  getBudgetState,
+  recordSpend
 } from '../services/budget.service.js';
 import { searchKnowledgeBase, getCachedResponse, setCachedResponse } from '../services/rag.service.js';
 import { callOtari } from '../services/otari.service.js';
@@ -10,6 +14,23 @@ import { MODELS } from '../config/otari.js';
 import { detectInjection, validateResponse } from '../services/injection.service.js';
 import { SecurityLog } from '../models/SecurityLog.model.js';
 import { Session } from '../models/Session.model.js';
+import fetch from 'node-fetch';
+
+async function searchWeb(query) {
+  try {
+    const res = await fetch(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`);
+    const text = await res.text();
+    const snippetRegex = /<a class="result__snippet[^>]*>(.*?)<\/a>/g;
+    const snippets = [];
+    let match;
+    while ((match = snippetRegex.exec(text)) !== null && snippets.length < 5) {
+      snippets.push(match[1].replace(/<\/?[^>]+(>|$)/g, ""));
+    }
+    return snippets.join('\n\n');
+  } catch (e) {
+    return 'Web search failed or timed out.';
+  }
+}
 
 const MODEL_DISPLAY_NAMES = {
   'mzai:moonshotai/Kimi-K2.6': 'Kimi K2.6',
@@ -19,7 +40,7 @@ const MODEL_DISPLAY_NAMES = {
 
 export async function handleAIChat(req, res, next) {
   try {
-    const { message, sessionId, chatHistory = [], socraticMode = false } = req.body;
+    const { message, sessionId, chatHistory = [], socraticMode = false, webSearchMode = false } = req.body;
     const userId = req.user?._id || req.user?.id;
 
     if (!message?.trim()) {
@@ -27,9 +48,10 @@ export async function handleAIChat(req, res, next) {
     }
 
     const startTime = Date.now();
+    const trackingId = userId ? userId.toString() : (sessionId || 'demo-session-id');
     
     // Moving Train Step 1: Query Received
-    emitRoutingEvent(sessionId, {
+    emitRoutingEvent(trackingId, {
       type: 'routing_step',
       step: 1,
       status: 'analyzing',
@@ -37,7 +59,6 @@ export async function handleAIChat(req, res, next) {
       timestamp: new Date().toISOString()
     });
 
-    const trackingId = userId ? userId.toString() : (sessionId || 'demo-session-id');
     const budgetStatsBefore = await getAllBudgetStats(trackingId);
 
     // 1. Zero-Cost Semantic Caching / RAG
@@ -94,7 +115,7 @@ export async function handleAIChat(req, res, next) {
         );
       }
 
-      emitRoutingEvent(sessionId, {
+      emitRoutingEvent(trackingId, {
         type: 'routing_decision',
         ...responsePayload.routing,
         cost: responsePayload.cost,
@@ -120,7 +141,7 @@ export async function handleAIChat(req, res, next) {
         },
       };
 
-      emitRoutingEvent(sessionId, {
+      emitRoutingEvent(trackingId, {
         type: 'routing_decision',
         ...responsePayload.routing,
         cost: responsePayload.cost,
@@ -131,7 +152,7 @@ export async function handleAIChat(req, res, next) {
     }
 
     // Moving Train Step 2: Context Window & Security Check
-    emitRoutingEvent(sessionId, {
+    emitRoutingEvent(trackingId, {
       type: 'routing_step',
       step: 2,
       status: 'analyzing',
@@ -157,7 +178,7 @@ export async function handleAIChat(req, res, next) {
         cost: 0,
       });
 
-      emitRoutingEvent(sessionId, {
+      emitRoutingEvent(trackingId, {
         type: 'injection_blocked',
         message: message.substring(0, 50) + '...',
         timestamp: new Date().toISOString(),
@@ -172,7 +193,7 @@ export async function handleAIChat(req, res, next) {
     }
 
     // Moving Train Step 3: Routing Logic
-    emitRoutingEvent(sessionId, {
+    emitRoutingEvent(trackingId, {
       type: 'routing_step',
       step: 3,
       status: 'routing',
@@ -194,7 +215,7 @@ export async function handleAIChat(req, res, next) {
       });
     }
 
-    const selectedModel = await getDegradedModel(trackingId, baseModel);
+    let selectedModel = await getDegradedModel(trackingId, baseModel);
     const degraded = selectedModel !== baseModel;
     
     let degradeReason;
@@ -205,11 +226,18 @@ export async function handleAIChat(req, res, next) {
       degradeReason = `[BUDGET HEALTHY] ✅ Sufficient funds ($${budgetStatsBefore.remaining.toFixed(2)} left). Safely routed to ${tierName} ${MODEL_DISPLAY_NAMES[selectedModel]}. Intent: ${classification.reason}`;
     }
 
+    // --- OVERRIDE FOR EXPLICIT WEB SEARCH ---
+    if (webSearchMode) {
+      selectedModel = MODELS.SIMPLE; // Force Mozilla Otari AI
+      classification.signals.needsWebSearch = true;
+      degradeReason = `[WEB SEARCH ENABLED] 🌐 Forced routing to Mozilla Otari AI (${MODEL_DISPLAY_NAMES[selectedModel]}).`;
+    }
+
     let injectionStatus = localInjectionResult.threatLevel === 'suspicious' ? 'monitor' : 'clean';
     let otariResult;
 
     // Moving Train Step 4: Model Selected
-    emitRoutingEvent(sessionId, {
+    emitRoutingEvent(trackingId, {
       type: 'routing_step',
       step: 4,
       status: 'routing',
@@ -217,7 +245,46 @@ export async function handleAIChat(req, res, next) {
       timestamp: new Date().toISOString()
     });
 
-    emitRoutingEvent(sessionId, {
+    let webSearchResults = '';
+    if (classification.signals.needsWebSearch) {
+      emitRoutingEvent(trackingId, {
+        type: 'routing_step',
+        step: 4,
+        status: 'routing',
+        message: `Browsing the live web for: "${message.substring(0, 30)}..."`,
+        timestamp: new Date().toISOString()
+      });
+      webSearchResults = await searchWeb(message);
+    }
+
+    let baseSystemPrompt = socraticMode 
+      ? `You are IRIS, an intelligent AI Socratic Tutor for students. 
+         Your core directives:
+         1. NEVER just give the final answer to a homework, math, or coding problem. Instead, ask guiding questions and guide the student to figure it out themselves.
+         2. Protect privacy: Never ask for or reveal Personal Identifiable Information (PII).
+         3. Be helpful, concise, and educational.
+         Current budget mode: ${budgetMode}. 
+         Today's date: ${new Date().toLocaleDateString()}.`
+      : `You are IRIS, an intelligent AI assistant for students. 
+         Be helpful, concise, and educational. 
+         Current budget mode: ${budgetMode}. 
+         Today's date: ${new Date().toLocaleDateString()}.`;
+
+    if (classification.signals.needsWebSearch && webSearchResults) {
+      baseSystemPrompt += `\n\n[LIVE WEB SEARCH RESULTS FOR USER QUERY]:\n${webSearchResults}\n\nUse the above real-time data to answer the user's query accurately. Do NOT mention that you used a proxy or DuckDuckGo, just provide the answer seamlessly.`;
+    }
+
+    // Apply Socratic Mode if enabled
+    let finalSystemPromptSnippets = [baseSystemPrompt];
+    if (socraticMode) {
+      finalSystemPromptSnippets.unshift(
+        "You are now acting as a 'Socratic Teacher' (or Guided Mentor).",
+        "Do NOT give direct answers. Instead, ask probing questions to help the user discover the answer themselves.",
+        "Encourage critical thinking and guide them step-by-step."
+      );
+    }
+
+    emitRoutingEvent(trackingId, {
       type: 'routing_step',
       step: 5,
       status: 'generating',
@@ -233,23 +300,20 @@ export async function handleAIChat(req, res, next) {
           ...chatHistory.slice(-6),
           { role: 'user', content: message },
         ],
-        systemPrompt: socraticMode 
-          ? `You are IRIS, an intelligent AI Socratic Tutor for students. 
-             Your core directives:
-             1. NEVER just give the final answer to a homework, math, or coding problem. Instead, ask guiding questions and guide the student to figure it out themselves.
-             2. Protect privacy: Never ask for or reveal Personal Identifiable Information (PII).
-             3. Be helpful, concise, and educational.
-             Current budget mode: ${budgetMode}. 
-             Today's date: ${new Date().toLocaleDateString()}.`
-          : `You are IRIS, an intelligent AI assistant for students. 
-             Be helpful, concise, and educational. 
-             Current budget mode: ${budgetMode}. 
-             Today's date: ${new Date().toLocaleDateString()}.`,
+        systemPrompt: finalSystemPromptSnippets,
         guardrailMode: 'block', // Enforce blocking at the gateway
-        useWebSearch: classification.signals.needsWebSearch,
+        useWebSearch: webSearchMode, // Send to Otari if enabled by user
         sessionId,
       });
     } catch (err) {
+      // Differentiate between Web Search 403 and actual prompt injection
+      if (err?.status === 403 && webSearchMode) {
+        return res.json({
+          answer: "⚠️ **Web Search Failed**: Your current Otari API key does not have permission to use the Web Search tool. Please upgrade your key or disable the Web Search toggle.",
+          cost: { thisCall: 0, ...await getAllBudgetStats(sessionId) },
+        });
+      }
+
       // If Otari blocks the request due to injection
       if (err?.status === 400 || err?.status === 403 || err?.message?.toLowerCase().includes('injection') || err?.message?.toLowerCase().includes('guardrail')) {
         injectionStatus = 'blocked';
@@ -267,7 +331,7 @@ export async function handleAIChat(req, res, next) {
           cost: 0,
         });
 
-        emitRoutingEvent(sessionId, {
+        emitRoutingEvent(trackingId, {
           type: 'injection_blocked',
           message: message.substring(0, 50) + '...',
           timestamp: new Date().toISOString(),
@@ -413,7 +477,7 @@ export async function handleAIChat(req, res, next) {
     }
 
     // Moving Train Step 6: Done
-    emitRoutingEvent(sessionId, {
+    emitRoutingEvent(trackingId, {
       type: 'routing_step',
       step: 6,
       status: 'done',
@@ -421,7 +485,7 @@ export async function handleAIChat(req, res, next) {
       timestamp: new Date().toISOString()
     });
 
-    emitRoutingEvent(sessionId, {
+    emitRoutingEvent(trackingId, {
       type: 'routing_decision',
       ...responsePayload.routing,
       cost: responsePayload.cost,
@@ -433,6 +497,39 @@ export async function handleAIChat(req, res, next) {
     return res.json(responsePayload);
 
   } catch (err) {
+    next(err);
+  }
+}
+
+export async function getChatHistory(req, res, next) {
+  try {
+    const { sessionId } = req.params;
+    const userId = req.user?._id || req.user?.id;
+    
+    if (!userId || !sessionId) {
+      return res.status(400).json({ error: 'Missing userId or sessionId' });
+    }
+
+    const session = await Session.findOne({ sessionId, userId });
+    
+    if (!session) {
+      return res.json({ messages: [] });
+    }
+
+    const formattedMessages = session.messages.map(msg => ({
+      role: msg.role,
+      content: msg.content,
+      id: msg._id,
+      tier: msg.routing?.tier,
+      model: msg.routing?.model,
+      routing: msg.routing,
+      cost: msg.cost,
+      injectionStatus: msg.injectionStatus
+    }));
+
+    return res.json({ messages: formattedMessages });
+  } catch (err) {
+    console.error('Failed to get chat history:', err);
     next(err);
   }
 }

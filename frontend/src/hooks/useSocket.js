@@ -9,18 +9,19 @@ export function useSocket(sessionId) {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const savedEvents = sessionStorage.getItem('iris_routing_events');
+    if (!sessionId) return;
+    const savedEvents = sessionStorage.getItem(`iris_routing_events_${sessionId}`);
     if (savedEvents) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       try { setRoutingEvents(JSON.parse(savedEvents)); } catch (e) {}
     }
-  }, []);
+  }, [sessionId]);
 
   useEffect(() => {
-    if (routingEvents.length > 0) {
-      sessionStorage.setItem('iris_routing_events', JSON.stringify(routingEvents));
+    if (routingEvents.length > 0 && sessionId) {
+      sessionStorage.setItem(`iris_routing_events_${sessionId}`, JSON.stringify(routingEvents));
     }
-  }, [routingEvents]);
+  }, [routingEvents, sessionId]);
 
   useEffect(() => {
     if (!sessionId) return;
