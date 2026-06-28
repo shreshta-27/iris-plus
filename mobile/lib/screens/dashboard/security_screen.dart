@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme.dart';
+import '../../core/socket_service.dart';
 import '../../providers/analytics_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../widgets/neo_card.dart';
 import '../../widgets/injection_badge.dart';
 
@@ -16,12 +18,37 @@ class SecurityScreen extends StatefulWidget {
 }
 
 class _SecurityScreenState extends State<SecurityScreen> {
+  final SocketService _socketService = SocketService();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AnalyticsProvider>().fetchSecurity();
+      if (!mounted) return;
+      final auth = context.read<AuthProvider>();
+      context.read<AnalyticsProvider>().fetchSecurity(auth.userId);
+      
+      if (!_socketService.isConnected) {
+        _socketService.connect(auth.userId);
+      }
     });
+    _socketService.addRoutingListener(_onRoutingEvent);
+  }
+
+  void _onRoutingEvent(Map<String, dynamic> event) {
+    // If an injection is blocked or a routing decision is made, refresh security stats
+    if (event['type'] == 'injection_blocked' || event['type'] == 'routing_decision') {
+      if (mounted) {
+        final auth = context.read<AuthProvider>();
+        context.read<AnalyticsProvider>().fetchSecurity(auth.userId);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _socketService.removeRoutingListener(_onRoutingEvent);
+    super.dispose();
   }
 
   @override
@@ -53,7 +80,10 @@ class _SecurityScreenState extends State<SecurityScreen> {
         final categoryBreakdown = data['categoryBreakdown'] ?? {};
 
         return RefreshIndicator(
-          onRefresh: provider.fetchSecurity,
+          onRefresh: () async {
+            final auth = context.read<AuthProvider>();
+            await provider.fetchSecurity(auth.userId);
+          },
           color: IrisColors.irisPurple,
           child: ListView(
             padding: const EdgeInsets.all(20),
