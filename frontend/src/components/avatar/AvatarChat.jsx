@@ -642,7 +642,8 @@ export default function AvatarChat() {
       window.avatarSpeak = (reply) => {
         const anim = getAnimForText(reply);
         if (anim === 'Wave') {
-          playOnceReturnToIdle('Wave');
+          playAnimation('Wave', false);
+          setTimeout(() => playAnimation('Idle', true), 2500);
         } else {
           const talkAction = findAction('Talking');
           if (talkAction) playAnimation('Talking', true);

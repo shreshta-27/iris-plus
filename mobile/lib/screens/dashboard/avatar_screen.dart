@@ -101,6 +101,8 @@ class _AvatarScreenState extends State<AvatarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+    
     return Consumer<ChatProvider>(
       builder: (context, chatProvider, _) {
         return Scaffold(
@@ -109,8 +111,9 @@ class _AvatarScreenState extends State<AvatarScreen> {
             child: Column(
               children: [
                 // 3D Avatar Viewport
-                Container(
-                  height: 350,
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  height: isKeyboardOpen ? 150 : 350,
                   decoration: BoxDecoration(
                     color: IrisColors.white,
                     border: const Border(bottom: BorderSide(color: IrisColors.ink, width: 4)),

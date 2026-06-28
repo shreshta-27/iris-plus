@@ -94,6 +94,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final chat = context.watch<ChatProvider>();
     final budget = context.watch<BudgetProvider>();
     final isExceeded = budget.mode == 'exceeded';
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
 
     return Column(
       children: [
@@ -114,10 +115,11 @@ class _ChatScreenState extends State<ChatScreen> {
                   },
                 ),
         ),
-        LiveRoutingFeed(
-          events: _routingEvents,
-          isConnected: _isSocketConnected,
-        ),
+        if (!isKeyboardOpen)
+          LiveRoutingFeed(
+            events: _routingEvents,
+            isConnected: _isSocketConnected,
+          ),
         ChatInput(
           onSend: _handleSend,
           disabled: isExceeded,
