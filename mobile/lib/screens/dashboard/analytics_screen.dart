@@ -6,6 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme.dart';
 import '../../providers/analytics_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../widgets/neo_card.dart';
 
 class AnalyticsScreen extends StatefulWidget {
