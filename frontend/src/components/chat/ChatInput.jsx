@@ -14,6 +14,9 @@ export default function ChatInput({ onSend, disabled, budgetExceeded }) {
   const fileInputRef = useRef(null);
   const lastSendRef = useRef(0);
 
+  const [webSearchEnabled, setWebSearchEnabled] = useState(false);
+  const [socraticEnabled, setSocraticEnabled] = useState(false);
+
   const handleSend = useCallback(async () => {
     const now = Date.now();
     if (now - lastSendRef.current < 1000) return;
@@ -28,7 +31,7 @@ export default function ChatInput({ onSend, disabled, budgetExceeded }) {
     setSending(true);
 
     try {
-      await onSend(finalMessage.trim());
+      await onSend(finalMessage.trim(), { webSearch: webSearchEnabled, socratic: socraticEnabled });
       setMessage('');
       setAttachedFileText('');
       setAttachedFileName('');
@@ -38,7 +41,7 @@ export default function ChatInput({ onSend, disabled, budgetExceeded }) {
     } finally {
       setSending(false);
     }
-  }, [message, sending, disabled, onSend, attachedFileText, attachedFileName]);
+  }, [message, sending, disabled, onSend, attachedFileText, attachedFileName, webSearchEnabled, socraticEnabled]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -108,6 +111,32 @@ export default function ChatInput({ onSend, disabled, budgetExceeded }) {
             </button>
           </div>
         )}
+
+        <div className="flex items-center gap-3 mb-3 px-1">
+          <button
+            onClick={() => setWebSearchEnabled(!webSearchEnabled)}
+            className={`text-xs font-bold px-3 py-1.5 rounded-full border-[2px] transition-all flex items-center gap-1.5 ${
+              webSearchEnabled 
+                ? 'bg-iris-purple text-white border-ink shadow-[2px_2px_0_#1A1A2E]' 
+                : 'bg-white text-ink/60 border-ink/20 hover:border-ink hover:text-ink hover:shadow-[2px_2px_0_#1A1A2E]'
+            }`}
+          >
+            <div className={`w-2 h-2 rounded-full ${webSearchEnabled ? 'bg-white' : 'bg-ink/30'}`} />
+            Web Search
+          </button>
+          
+          <button
+            onClick={() => setSocraticEnabled(!socraticEnabled)}
+            className={`text-xs font-bold px-3 py-1.5 rounded-full border-[2px] transition-all flex items-center gap-1.5 ${
+              socraticEnabled 
+                ? 'bg-coral text-ink border-ink shadow-[2px_2px_0_#1A1A2E]' 
+                : 'bg-white text-ink/60 border-ink/20 hover:border-ink hover:text-ink hover:shadow-[2px_2px_0_#1A1A2E]'
+            }`}
+          >
+            <div className={`w-2 h-2 rounded-full border border-ink/20 ${socraticEnabled ? 'bg-white' : 'bg-transparent'}`} />
+            Socratic Teacher
+          </button>
+        </div>
         
         <div className="flex items-end gap-3 relative">
           <input 
