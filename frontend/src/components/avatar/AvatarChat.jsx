@@ -11,12 +11,18 @@ export default function AvatarChat() {
   const currentActionRef = useRef(null);
   const morphMeshesRef = useRef([]);
   const lipSyncRef = useRef(null);
-  const clockRef = useRef(null);
+  const lastTimeRef = useRef(null);
   const rendererRef = useRef(null);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
   const animIdRef = useRef(null);
   const threeRef = useRef(null);
+  const vrmRef = useRef(null);
+
+  // Procedural arm animation state
+  const animStateRef = useRef('Idle'); // 'Idle' | 'Wave' | 'Talking'
+  const animTimerRef = useRef(0);
+  const currentArmPoseRef = useRef(null);
 
   const [messages, setMessages] = useState([
     { role: 'avatar', text: "Hi! I'm Iris, your AI learning assistant! Ask me anything — I'll help you learn. ✨" }
@@ -43,7 +49,8 @@ export default function AvatarChat() {
       const THREE = await import('three');
       threeRef.current = THREE;
       const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
-      clockRef.current = new THREE.Clock();
+      const { VRMLoaderPlugin } = await import('@pixiv/three-vrm');
+      lastTimeRef.current = performance.now();
 
       const container = mountRef.current;
       if (!container || cancelled) return;
@@ -104,13 +111,23 @@ export default function AvatarChat() {
       ground.position.y = 0;
       scene.add(ground);
 
-      // Load avatar
+      // Load avatar with VRM plugin for proper bone handling
       const loader = new GLTFLoader();
+      loader.register((parser) => new VRMLoaderPlugin(parser));
+
       loader.load(
         '/3d-model/avatar.glb',
         (gltf) => {
           if (cancelled) return;
-          const avatar = gltf.scene;
+          const vrm = gltf.userData.vrm;
+          const avatar = vrm ? vrm.scene : gltf.scene;
+
+          if (vrm) {
+            vrmRef.current = vrm;
+            console.log('[AvatarChat] VRM model loaded successfully');
+          } else {
+            console.log('[AvatarChat] Loaded as standard GLTF (no VRM data)');
+          }
 
           // Center the avatar
           const box = new THREE.Box3().setFromObject(avatar);
@@ -126,31 +143,41 @@ export default function AvatarChat() {
             }
           });
 
-          // Setup animation mixer
+          // Setup animation mixer — play ALL tracks unfiltered
           const mixer = new THREE.AnimationMixer(avatar);
           mixerRef.current = mixer;
 
           if (gltf.animations && gltf.animations.length > 0) {
             gltf.animations.forEach((clip) => {
-              actionsRef.current[clip.name] = mixer.clipAction(clip);
+              const action = mixer.clipAction(clip);
+              actionsRef.current[clip.name] = action;
+              console.log('[AvatarChat] Registered animation:', clip.name, '— tracks:', clip.tracks.length);
             });
-            playAnimation('Idle', true);
+
+            // Play Idle immediately
+            const idleAction = findAction('Idle');
+            if (idleAction) {
+              idleAction.reset();
+              idleAction.setLoop(THREE.LoopRepeat, Infinity);
+              idleAction.clampWhenFinished = false;
+              idleAction.enabled = true;
+              idleAction.setEffectiveWeight(1.0);
+              idleAction.play();
+              currentActionRef.current = idleAction;
+            }
           }
 
           setAvatarReady(true);
           setStatus('Ready');
 
-          // Greeting animation
+          // Greeting: speak only, no wave on load
           setTimeout(() => {
-            const hasWave = findAction('Wave');
-            if (hasWave) {
-              playOnceReturnToIdle('Wave');
-            }
+            setAnimState('Idle');
             if (ttsEnabled) {
               startLipSync();
               speakText("Hi! I'm Iris, your AI assistant! How can I help you today?", () => {
                 stopLipSync();
-                playAnimation('Idle', true);
+                setAnimState('Idle');
               });
             }
           }, 800);
@@ -164,15 +191,28 @@ export default function AvatarChat() {
         (error) => {
           console.error('Avatar load error:', error);
           setStatus('Avatar load failed');
-          setAvatarReady(true); // Still allow chat
+          setAvatarReady(true);
         }
       );
 
-      // Animation loop
+      // ── Animation loop ──
       const animate = () => {
         animIdRef.current = requestAnimationFrame(animate);
-        const delta = clockRef.current.getDelta();
+        const now = performance.now();
+        const delta = (now - lastTimeRef.current) / 1000;
+        lastTimeRef.current = now;
+        const t = now / 1000;
+
+        // 1. Update the animation mixer (plays base body animation)
         if (mixerRef.current) mixerRef.current.update(delta);
+
+        // 2. Override arm bones AFTER the mixer to fix the T-pose
+        applyArmPose(t, delta, THREE);
+
+        // 3. Update VRM (spring bones for hair/clothing physics)
+        if (vrmRef.current) vrmRef.current.update(delta);
+
+        // 4. Render
         renderer.render(scene, camera);
       };
       animate();
@@ -211,14 +251,161 @@ export default function AvatarChat() {
     };
   }, []);
 
-  // ── Animation Helpers ──
+  // ── Arm Pose Override ──
+  // This function runs AFTER mixer.update() each frame to correct the T-pose arms.
+  // The GLB animations have the arms locked in T-pose (confirmed via binary analysis).
+  // We override UpperArm and LowerArm with correct rotations.
+  const applyArmPose = useCallback((t, delta, THREE) => {
+    if (!vrmRef.current && !mixerRef.current) return;
+
+    // Get bone references — try VRM humanoid API first, then fall back to scene traversal
+    let leftUpperArm, rightUpperArm, leftLowerArm, rightLowerArm, leftHand, rightHand;
+
+    const vrm = vrmRef.current;
+    if (vrm && vrm.humanoid) {
+      leftUpperArm = vrm.humanoid.getRawBoneNode('leftUpperArm');
+      rightUpperArm = vrm.humanoid.getRawBoneNode('rightUpperArm');
+      leftLowerArm = vrm.humanoid.getRawBoneNode('leftLowerArm');
+      rightLowerArm = vrm.humanoid.getRawBoneNode('rightLowerArm');
+      leftHand = vrm.humanoid.getRawBoneNode('leftHand');
+      rightHand = vrm.humanoid.getRawBoneNode('rightHand');
+    }
+
+    // Fallback: find bones by name in scene
+    if (!leftUpperArm) {
+      const scene = sceneRef.current;
+      if (!scene) return;
+      scene.traverse((node) => {
+        if (!node.isBone) return;
+        switch (node.name) {
+          case 'J_Bip_L_UpperArm': leftUpperArm = node; break;
+          case 'J_Bip_R_UpperArm': rightUpperArm = node; break;
+          case 'J_Bip_L_LowerArm': leftLowerArm = node; break;
+          case 'J_Bip_R_LowerArm': rightLowerArm = node; break;
+          case 'J_Bip_L_Hand': leftHand = node; break;
+          case 'J_Bip_R_Hand': rightHand = node; break;
+        }
+      });
+    }
+
+    if (!leftUpperArm || !rightUpperArm) return;
+
+    const state = animStateRef.current;
+    const Q = THREE.Quaternion;
+    const V = THREE.Vector3;
+
+    // Initialize our persistent pose state for smooth slerping
+    if (!currentArmPoseRef.current) {
+      currentArmPoseRef.current = {
+        leftUpperArm: new Q(), rightUpperArm: new Q(),
+        leftLowerArm: new Q(), rightLowerArm: new Q(),
+        rightHand: new Q(),
+        initialized: false
+      };
+    }
+    const curPose = currentArmPoseRef.current;
+
+    // ── Target Quaternions ──
+    const targetLeftUpperArm = new Q();
+    const targetRightUpperArm = new Q();
+    const targetLeftLowerArm = new Q();
+    const targetRightLowerArm = new Q();
+    const targetRightHand = new Q();
+
+    // Arms-down pose quaternions (base)
+    const leftArmDown = new Q().setFromAxisAngle(new V(0, 0, 1), -1.2);
+    const rightArmDown = new Q().setFromAxisAngle(new V(0, 0, 1), 1.2);
+    const leftElbowBend = new Q().setFromAxisAngle(new V(0, 1, 0), 0.15);
+    const rightElbowBend = new Q().setFromAxisAngle(new V(0, 1, 0), -0.15);
+
+    // Breathing: very subtle shoulder movement
+    const breathAmt = Math.sin(t * 1.5) * 0.02;
+    const breathL = new Q().setFromAxisAngle(new V(0, 0, 1), breathAmt);
+    const breathR = new Q().setFromAxisAngle(new V(0, 0, 1), -breathAmt);
+
+    if (state === 'Idle') {
+      targetLeftUpperArm.copy(leftArmDown).multiply(breathL);
+      targetRightUpperArm.copy(rightArmDown).multiply(breathR);
+      targetLeftLowerArm.copy(leftElbowBend);
+      targetRightLowerArm.copy(rightElbowBend);
+      targetRightHand.identity();
+
+    } else if (state === 'Wave') {
+      targetLeftUpperArm.copy(leftArmDown).multiply(breathL);
+      targetLeftLowerArm.copy(leftElbowBend);
+
+      const waveArmUp = new Q().setFromAxisAngle(new V(0, 0, 1), 0.3);
+      const waveArmForward = new Q().setFromAxisAngle(new V(1, 0, 0), 0.3);
+      targetRightUpperArm.copy(waveArmUp).multiply(waveArmForward);
+
+      const waveElbow = new Q().setFromAxisAngle(new V(0, 1, 0), -2.0);
+      targetRightLowerArm.copy(waveElbow);
+
+      const waveHandAngle = Math.sin(t * 8) * 0.6;
+      targetRightHand.setFromAxisAngle(new V(0, 0, 1), waveHandAngle);
+
+      animTimerRef.current += delta;
+      if (animTimerRef.current > 2.5) {
+        animStateRef.current = 'Idle';
+        animTimerRef.current = 0;
+      }
+
+    } else if (state === 'Talking') {
+      const gesturePhase = t * 2.5;
+
+      const leftGestureZ = -1.0 + Math.sin(gesturePhase) * 0.15;
+      const leftGestureX = 0.15 + Math.sin(gesturePhase * 0.7) * 0.1;
+      const leftUp = new Q().setFromAxisAngle(new V(0, 0, 1), leftGestureZ);
+      const leftFwd = new Q().setFromAxisAngle(new V(1, 0, 0), leftGestureX);
+      targetLeftUpperArm.copy(leftUp).multiply(leftFwd);
+
+      const rightGestureZ = 1.0 + Math.cos(gesturePhase * 1.1) * 0.15;
+      const rightGestureX = 0.15 + Math.cos(gesturePhase * 0.8) * 0.1;
+      const rightUp = new Q().setFromAxisAngle(new V(0, 0, 1), rightGestureZ);
+      const rightFwd = new Q().setFromAxisAngle(new V(1, 0, 0), rightGestureX);
+      targetRightUpperArm.copy(rightUp).multiply(rightFwd);
+
+      const leftElbowGesture = 0.3 + Math.sin(gesturePhase * 1.3) * 0.2;
+      const rightElbowGesture = -0.3 + Math.cos(gesturePhase * 1.4) * 0.2;
+      targetLeftLowerArm.setFromAxisAngle(new V(0, 1, 0), leftElbowGesture);
+      targetRightLowerArm.setFromAxisAngle(new V(0, 1, 0), rightElbowGesture);
+      targetRightHand.identity();
+    }
+
+    // ── Smooth Interpolation (Slerp) ──
+    // Use a framerate-independent lerp factor. 12 = speed of transition.
+    const slerpFactor = curPose.initialized ? (1.0 - Math.exp(-12 * delta)) : 1.0;
+
+    curPose.leftUpperArm.slerp(targetLeftUpperArm, slerpFactor);
+    curPose.rightUpperArm.slerp(targetRightUpperArm, slerpFactor);
+    curPose.leftLowerArm.slerp(targetLeftLowerArm, slerpFactor);
+    curPose.rightLowerArm.slerp(targetRightLowerArm, slerpFactor);
+    curPose.rightHand.slerp(targetRightHand, slerpFactor);
+    curPose.initialized = true;
+
+    // Apply to actual bones
+    leftUpperArm.quaternion.copy(curPose.leftUpperArm);
+    rightUpperArm.quaternion.copy(curPose.rightUpperArm);
+    if (leftLowerArm) leftLowerArm.quaternion.copy(curPose.leftLowerArm);
+    if (rightLowerArm) rightLowerArm.quaternion.copy(curPose.rightLowerArm);
+    if (rightHand) rightHand.quaternion.copy(curPose.rightHand);
+
+  }, []);
+
+  // ── Animation State Helpers ──
   const findAction = (name) => {
     const actions = actionsRef.current;
     return actions[name] ||
       actions[Object.keys(actions).find(k => k.toLowerCase().includes(name.toLowerCase()))];
   };
 
+  const setAnimState = useCallback((state) => {
+    animStateRef.current = state;
+    animTimerRef.current = 0;
+  }, []);
+
   const playAnimation = useCallback((name, loop) => {
+    const THREE = threeRef.current;
     const action = findAction(name);
     if (!action) return;
 
@@ -227,26 +414,13 @@ export default function AvatarChat() {
     }
 
     action.reset();
-    action.setLoop(loop ? 2201 : 2200, Infinity); // LoopRepeat : LoopOnce
+    action.setLoop(loop ? (THREE?.LoopRepeat ?? 2201) : (THREE?.LoopOnce ?? 2200), loop ? Infinity : 1);
     action.clampWhenFinished = !loop;
+    action.enabled = true;
+    action.setEffectiveWeight(1.0);
     action.fadeIn(0.3).play();
     currentActionRef.current = action;
   }, []);
-
-  const playOnceReturnToIdle = useCallback((name) => {
-    const action = findAction(name);
-    if (!action) return;
-
-    if (currentActionRef.current) currentActionRef.current.fadeOut(0.3);
-    action.reset();
-    action.setLoop(2200, 1); // LoopOnce
-    action.clampWhenFinished = true;
-    action.fadeIn(0.3).play();
-    currentActionRef.current = action;
-
-    const duration = action.getClip().duration * 1000;
-    setTimeout(() => playAnimation('Idle', true), duration);
-  }, [playAnimation]);
 
   // ── Lip Sync ──
   const MOUTH_KEYS = ['Fcl_MTH_A', 'vrc.v_aa', 'MTH_A', 'mouthOpen', 'jawOpen', 'viseme_aa'];
@@ -292,12 +466,19 @@ export default function AvatarChat() {
     utt.rate = 1.0;
     utt.pitch = 1.15;
 
+    // Select a female voice
     const voices = window.speechSynthesis.getVoices();
-    const preferred = voices.find(v =>
-      v.name.includes('Female') || v.name.includes('Samantha') ||
-      v.name.includes('Zira') || v.name.includes('Google') && v.lang.startsWith('en')
-    );
-    if (preferred) utt.voice = preferred;
+    const femaleVoice =
+      voices.find(v => v.name.includes('Zira')) ||                                    // Windows female
+      voices.find(v => v.name.includes('Samantha')) ||                                 // macOS female
+      voices.find(v => v.name.includes('Google UK English Female')) ||                 // Chrome female
+      voices.find(v => v.name.includes('Female') && v.lang.startsWith('en')) ||        // Any English female
+      voices.find(v => v.name.includes('Victoria')) ||
+      voices.find(v => v.name.includes('Karen')) ||
+      voices.find(v => v.name.includes('Susan')) ||
+      voices.find(v => v.lang.startsWith('en'));                                       // Fallback: any English
+
+    if (femaleVoice) utt.voice = femaleVoice;
 
     setIsSpeaking(true);
     utt.onend = () => { setIsSpeaking(false); if (onEnd) onEnd(); };
@@ -310,7 +491,6 @@ export default function AvatarChat() {
   const getAnimForText = (text) => {
     const t = text.toLowerCase();
     if (/\b(hi|hello|hey|bye|goodbye|welcome)\b/.test(t)) return 'Wave';
-    if (/\b(think|hmm|consider|analyze|complex)\b/.test(t)) return 'Thinking';
     return 'Talking';
   };
 
@@ -323,10 +503,6 @@ export default function AvatarChat() {
     setInput('');
     setIsSending(true);
     setStatus('Thinking...');
-
-    // Play a thinking animation while waiting
-    const thinkAction = findAction('Thinking');
-    if (thinkAction) playAnimation('Thinking', true);
 
     let reply = '';
     try {
@@ -343,15 +519,9 @@ export default function AvatarChat() {
     setMessages(prev => [...prev, { role: 'avatar', text: reply }]);
     setIsSending(false);
 
-    // Animate based on content
+    // Animate based on user input content
     const anim = getAnimForText(trimmed);
-    if (anim === 'Wave') {
-      playOnceReturnToIdle('Wave');
-    } else {
-      const talkAction = findAction('Talking');
-      if (talkAction) playAnimation('Talking', true);
-      else playAnimation('Idle', true);
-    }
+    setAnimState(anim);
 
     // Lip sync + TTS
     if (ttsEnabled) {
@@ -359,14 +529,15 @@ export default function AvatarChat() {
       setStatus('Speaking...');
       speakText(reply, () => {
         stopLipSync();
-        playAnimation('Idle', true);
+        setAnimState('Idle');
         setStatus('Ready');
       });
     } else {
-      playAnimation('Idle', true);
       setStatus('Ready');
+      // Return to idle after a bit if no TTS
+      setTimeout(() => setAnimState('Idle'), 3000);
     }
-  }, [isSending, ttsEnabled, playAnimation, playOnceReturnToIdle, startLipSync, stopLipSync, speakText]);
+  }, [isSending, ttsEnabled, setAnimState, startLipSync, stopLipSync, speakText]);
 
   // ── Mobile Bridge (JS to Flutter) ──
   useEffect(() => {
@@ -426,12 +597,12 @@ export default function AvatarChat() {
     if (isSpeaking && window.speechSynthesis) {
       window.speechSynthesis.cancel();
       stopLipSync();
-      playAnimation('Idle', true);
+      setAnimState('Idle');
       setIsSpeaking(false);
       setStatus('Ready');
     }
     setTtsEnabled(prev => !prev);
-  }, [isSpeaking, stopLipSync, playAnimation]);
+  }, [isSpeaking, stopLipSync, setAnimState]);
 
   return (
     <div className="h-full flex flex-col lg:flex-row gap-4 lg:gap-6">
