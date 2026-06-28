@@ -32,9 +32,6 @@ export async function callOtari({
     }
   };
 
-  if (useWebSearch) {
-    requestBody.tools = [{ type: 'otari_web_search' }];
-  }
 
   let response;
   try {
@@ -47,7 +44,17 @@ export async function callOtari({
       // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 800));
     } else {
-      response = await otariClient.chat.completions.create(requestBody);
+      try {
+        response = await otariClient.chat.completions.create(requestBody);
+      } catch (err) {
+        if (err.status === 502) {
+          console.warn(`[Otari API] 502 Bad Gateway on ${model}. Retrying in 1.5s...`);
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          response = await otariClient.chat.completions.create(requestBody);
+        } else {
+          throw err;
+        }
+      }
     }
   } catch (err) {
     // Fallback logic: If the selected model (e.g., Claude) is not available (404/502),
@@ -58,7 +65,18 @@ export async function callOtari({
         ...requestBody,
         model: 'mzai:moonshotai/Kimi-K2.6',
       };
-      response = await otariClient.chat.completions.create(fallbackBody);
+      
+      try {
+        response = await otariClient.chat.completions.create(fallbackBody);
+      } catch (fbErr) {
+        if (fbErr.status === 502) {
+          console.warn(`[Otari API] 502 Bad Gateway on fallback Kimi. Retrying in 1.5s...`);
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          response = await otariClient.chat.completions.create(fallbackBody);
+        } else {
+          throw fbErr;
+        }
+      }
       model = 'mzai:moonshotai/Kimi-K2.6';
     } else {
       throw err;

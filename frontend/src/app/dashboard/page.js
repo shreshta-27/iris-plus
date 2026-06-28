@@ -12,8 +12,7 @@ import { useBudget } from '@/hooks/useBudget';
 export default function DashboardPage() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [socraticMode, setSocraticMode] = useState(false);
-  const [webSearchMode, setWebSearchMode] = useState(false);
+
 
   const [user, setUser] = useState(null);
   
@@ -39,13 +38,14 @@ export default function DashboardPage() {
   const { socket, routingEvents, isConnected } = useSocket(sessionId);
   const { budget: stats, fetchBudget: fetchStats } = useBudget(sessionId);
 
-  const handleSend = async (text) => {
+  const handleSend = async (text, options = {}) => {
+    const { webSearch = false, socratic = false } = options;
     const newMessage = { role: 'user', content: text, id: Date.now() };
     setMessages(prev => [...prev, newMessage]);
     setIsLoading(true);
 
     try {
-      const res = await api.post('/api/ai/chat', { message: text, sessionId, socraticMode, webSearchMode });
+      const res = await api.post('/api/ai/chat', { message: text, sessionId, socraticMode: socratic, webSearchMode: webSearch });
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: res.answer,
@@ -90,24 +90,8 @@ export default function DashboardPage() {
            <div className="flex items-center gap-2">
              <h2 className="font-black text-xs md:text-sm uppercase tracking-widest text-ink">IRIS Assistant</h2>
            </div>
-           <div className="flex items-center gap-2">
-             <button 
-               onClick={() => setWebSearchMode(!webSearchMode)}
-               className={`px-3 py-1 text-[10px] md:text-xs font-bold uppercase rounded-full border-2 border-ink shadow-[2px_2px_0_#1A1A2E] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0_#1A1A2E] ${webSearchMode ? 'bg-iris-purple text-cream' : 'bg-gray-100 text-ink'}`}
-               title="Enable Web Search via Mozilla Otari AI"
-             >
-               Web Search: {webSearchMode ? 'ON' : 'OFF'}
-             </button>
-             <button 
-               onClick={() => setSocraticMode(!socraticMode)}
-               className={`px-3 py-1 text-[10px] md:text-xs font-bold uppercase rounded-full border-2 border-ink shadow-[2px_2px_0_#1A1A2E] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0_#1A1A2E] ${socraticMode ? 'bg-mint' : 'bg-gray-100'}`}
-               title="Act as an AI Tutor to guide you without giving direct answers, protecting privacy."
-             >
-               Tutor Mode: {socraticMode ? 'ON' : 'OFF'}
-             </button>
-           </div>
-        </div>
-        <ChatWindow messages={messages} isLoading={isLoading} />
+         </div>
+         <ChatWindow messages={messages} isLoading={isLoading} />
         <ChatInput 
           onSend={handleSend} 
           disabled={!isConnected} 

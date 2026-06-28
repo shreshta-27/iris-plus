@@ -300,7 +300,7 @@ export async function handleAIChat(req, res, next) {
           ...chatHistory.slice(-6),
           { role: 'user', content: message },
         ],
-        systemPrompt: finalSystemPromptSnippets,
+        systemPrompt: finalSystemPromptSnippets.join('\n'),
         guardrailMode: 'block', // Enforce blocking at the gateway
         useWebSearch: webSearchMode, // Send to Otari if enabled by user
         sessionId,

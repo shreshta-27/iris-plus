@@ -81,9 +81,7 @@ export async function getSecurityDashboard(req, res, next) {
   try {
     const userId = req.user.id || req.user._id;
 
-    const logs = await SecurityLog.find({ 
-      sessionId: req.query.sessionId || 'demo-session-id' 
-    }).sort({ timestamp: -1 }).limit(100);
+    const logs = await SecurityLog.find({ userId }).sort({ timestamp: -1 }).limit(100);
 
     const totalBlocked = logs.filter(l => l.action === 'blocked').length;
     const totalSuspicious = logs.filter(l => l.action === 'passed' && l.threatLevel === 'suspicious').length;
