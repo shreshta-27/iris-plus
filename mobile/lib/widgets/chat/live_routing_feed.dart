@@ -218,13 +218,13 @@ class LiveRoutingFeed extends StatelessWidget {
     if (type == 'routing_step') {
       final step = event['step'] as int? ?? 1;
       IconData icon;
-      if (step == 1) icon = Icons.timeline;
-      else if (step == 2) icon = Icons.psychology;
-      else if (step == 3) icon = Icons.route;
-      else if (step == 4) icon = Icons.psychology;
-      else if (step == 5) icon = Icons.cached;
-      else if (step == 6) icon = Icons.security;
-      else icon = Icons.timeline;
+      if (step == 1) { icon = Icons.timeline; }
+      else if (step == 2) { icon = Icons.psychology; }
+      else if (step == 3) { icon = Icons.route; }
+      else if (step == 4) { icon = Icons.psychology; }
+      else if (step == 5) { icon = Icons.cached; }
+      else if (step == 6) { icon = Icons.security; }
+      else { icon = Icons.timeline; }
       
       final isDone = event['status'] == 'done';
 
