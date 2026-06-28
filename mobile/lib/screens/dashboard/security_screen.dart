@@ -25,9 +25,9 @@ class _SecurityScreenState extends State<SecurityScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<AnalyticsProvider>().fetchSecurity();
-      
       final auth = context.read<AuthProvider>();
+      context.read<AnalyticsProvider>().fetchSecurity(auth.userId);
+      
       if (!_socketService.isConnected) {
         _socketService.connect(auth.userId);
       }
@@ -39,7 +39,8 @@ class _SecurityScreenState extends State<SecurityScreen> {
     // If an injection is blocked or a routing decision is made, refresh security stats
     if (event['type'] == 'injection_blocked' || event['type'] == 'routing_decision') {
       if (mounted) {
-        context.read<AnalyticsProvider>().fetchSecurity();
+        final auth = context.read<AuthProvider>();
+        context.read<AnalyticsProvider>().fetchSecurity(auth.userId);
       }
     }
   }
@@ -79,7 +80,10 @@ class _SecurityScreenState extends State<SecurityScreen> {
         final categoryBreakdown = data['categoryBreakdown'] ?? {};
 
         return RefreshIndicator(
-          onRefresh: provider.fetchSecurity,
+          onRefresh: () async {
+            final auth = context.read<AuthProvider>();
+            await provider.fetchSecurity(auth.userId);
+          },
           color: IrisColors.irisPurple,
           child: ListView(
             padding: const EdgeInsets.all(20),

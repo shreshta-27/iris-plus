@@ -33,7 +33,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AnalyticsProvider>().fetchAnalytics();
+      if (!mounted) return;
+      final auth = context.read<AuthProvider>();
+      context.read<AnalyticsProvider>().fetchAnalytics(auth.userId);
     });
   }
 
@@ -61,7 +63,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         final complexityBuckets = data['complexityBuckets'] as Map<String, dynamic>? ?? {};
 
         return RefreshIndicator(
-          onRefresh: provider.fetchAnalytics,
+          onRefresh: () async {
+            final auth = context.read<AuthProvider>();
+            await provider.fetchAnalytics(auth.userId);
+          },
           color: IrisColors.irisPurple,
           child: ListView(
             padding: const EdgeInsets.all(20),
