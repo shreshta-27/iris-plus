@@ -8,7 +8,6 @@ import '../../core/socket_service.dart';
 import '../../providers/analytics_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/neo_card.dart';
-import '../../widgets/injection_badge.dart';
 
 class SecurityScreen extends StatefulWidget {
   const SecurityScreen({super.key});

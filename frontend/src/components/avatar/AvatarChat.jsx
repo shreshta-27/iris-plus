@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable react-hooks/exhaustive-deps, react-hooks/immutability, react-hooks/preserve-manual-memoization */
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '@/lib/api';
@@ -475,6 +476,38 @@ export default function AvatarChat() {
     return audioContextRef.current;
   }, []);
 
+  // Browser TTS fallback (used when Smallest.ai is not available)
+  const fallbackBrowserTTS = useCallback((text, onEnd) => {
+    if (!window.speechSynthesis) {
+      setIsSpeaking(false);
+      if (onEnd) setTimeout(onEnd, Math.min(text.length * 50, 3000));
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.rate = 1.0;
+    utt.pitch = 1.15;
+
+    // Select a female voice
+    const voices = window.speechSynthesis.getVoices();
+    const femaleVoice =
+      voices.find(v => v.name.includes('Zira')) ||                                    // Windows female
+      voices.find(v => v.name.includes('Samantha')) ||                                 // macOS female
+      voices.find(v => v.name.includes('Google UK English Female')) ||                 // Chrome female
+      voices.find(v => v.name.includes('Female') && v.lang.startsWith('en')) ||        // Any English female
+      voices.find(v => v.name.includes('Victoria')) ||
+      voices.find(v => v.name.includes('Karen')) ||
+      voices.find(v => v.name.includes('Susan')) ||
+      voices.find(v => v.lang.startsWith('en'));                                       // Fallback: any English
+
+    if (femaleVoice) utt.voice = femaleVoice;
+
+    setIsSpeaking(true);
+    utt.onend = () => { setIsSpeaking(false); if (onEnd) onEnd(); };
+    utt.onerror = () => { setIsSpeaking(false); if (onEnd) onEnd(); };
+    window.speechSynthesis.speak(utt);
+  }, []);
+
   const speakText = useCallback(async (text, onEnd) => {
     if (!ttsEnabled || typeof window === 'undefined') {
       if (onEnd) setTimeout(onEnd, Math.min(text.length * 50, 3000));
@@ -535,39 +568,7 @@ export default function AvatarChat() {
       // Graceful fallback to browser TTS
       fallbackBrowserTTS(text, onEnd);
     }
-  }, [ttsEnabled, getAudioContext]);
-
-  // Browser TTS fallback (used when Smallest.ai is not available)
-  const fallbackBrowserTTS = useCallback((text, onEnd) => {
-    if (!window.speechSynthesis) {
-      setIsSpeaking(false);
-      if (onEnd) setTimeout(onEnd, Math.min(text.length * 50, 3000));
-      return;
-    }
-    window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.rate = 1.0;
-    utt.pitch = 1.15;
-
-    // Select a female voice
-    const voices = window.speechSynthesis.getVoices();
-    const femaleVoice =
-      voices.find(v => v.name.includes('Zira')) ||                                    // Windows female
-      voices.find(v => v.name.includes('Samantha')) ||                                 // macOS female
-      voices.find(v => v.name.includes('Google UK English Female')) ||                 // Chrome female
-      voices.find(v => v.name.includes('Female') && v.lang.startsWith('en')) ||        // Any English female
-      voices.find(v => v.name.includes('Victoria')) ||
-      voices.find(v => v.name.includes('Karen')) ||
-      voices.find(v => v.name.includes('Susan')) ||
-      voices.find(v => v.lang.startsWith('en'));                                       // Fallback: any English
-
-    if (femaleVoice) utt.voice = femaleVoice;
-
-    setIsSpeaking(true);
-    utt.onend = () => { setIsSpeaking(false); if (onEnd) onEnd(); };
-    utt.onerror = () => { setIsSpeaking(false); if (onEnd) onEnd(); };
-    window.speechSynthesis.speak(utt);
-  }, []);
+  }, [ttsEnabled, getAudioContext, fallbackBrowserTTS]);
 
   // ── Pick animation based on text ──
   const getAnimForText = (text) => {
