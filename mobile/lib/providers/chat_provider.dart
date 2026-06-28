@@ -37,6 +37,11 @@ class ChatProvider extends ChangeNotifier {
   List<ChatMessage> get messages => List.unmodifiable(_messages);
   bool get isLoading => _isLoading;
 
+  void setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+
   Future<String?> sendMessage(String text, String sessionId) async {
     final userMsg = ChatMessage(
       role: 'user',
