@@ -37,7 +37,7 @@ class ChatProvider extends ChangeNotifier {
   List<ChatMessage> get messages => List.unmodifiable(_messages);
   bool get isLoading => _isLoading;
 
-  Future<void> sendMessage(String text, String sessionId) async {
+  Future<String?> sendMessage(String text, String sessionId) async {
     final userMsg = ChatMessage(
       role: 'user',
       content: text,
@@ -53,9 +53,10 @@ class ChatProvider extends ChangeNotifier {
         'sessionId': sessionId,
       });
 
+      final aiText = res['answer']?.toString() ?? '';
       final aiMsg = ChatMessage(
         role: 'assistant',
-        content: res['answer']?.toString() ?? '',
+        content: aiText,
         id: DateTime.now().millisecondsSinceEpoch + 1,
         tier: res['routing']?['tier']?.toString(),
         model: res['routing']?['modelDisplayName']?.toString(),
@@ -64,6 +65,7 @@ class ChatProvider extends ChangeNotifier {
         injectionStatus: res['injectionStatus']?.toString(),
       );
       _messages.add(aiMsg);
+      return aiText;
     } on ApiException catch (e) {
       if (e.injectionDetected) {
         _messages.add(ChatMessage(
@@ -73,6 +75,7 @@ class ChatProvider extends ChangeNotifier {
           isBlocked: true,
           injectionStatus: 'blocked',
         ));
+        return 'I cannot answer that. Potential prompt injection detected and blocked by PIGuard.';
       } else {
         _messages.add(ChatMessage(
           role: 'assistant',
@@ -80,6 +83,7 @@ class ChatProvider extends ChangeNotifier {
           id: DateTime.now().millisecondsSinceEpoch + 1,
           isError: true,
         ));
+        return e.message;
       }
     } finally {
       _isLoading = false;

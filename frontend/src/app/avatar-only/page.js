@@ -20,7 +20,7 @@ export default function AvatarOnlyPage() {
           overflow: hidden;
         }
         /* Hide all UI elements from AvatarChat except the 3D canvas and the mic button if desired */
-        .chat-overlay, .neo-button {
+        .chat-panel {
           display: none !important;
         }
         canvas {

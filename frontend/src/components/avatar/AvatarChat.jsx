@@ -368,6 +368,41 @@ export default function AvatarChat() {
     }
   }, [isSending, ttsEnabled, playAnimation, playOnceReturnToIdle, startLipSync, stopLipSync, speakText]);
 
+  // ── Mobile Bridge (JS to Flutter) ──
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.avatarSpeak = (reply) => {
+        const anim = getAnimForText(reply);
+        if (anim === 'Wave') {
+          playOnceReturnToIdle('Wave');
+        } else {
+          const talkAction = findAction('Talking');
+          if (talkAction) playAnimation('Talking', true);
+          else playAnimation('Idle', true);
+        }
+
+        if (ttsEnabled) {
+          startLipSync();
+          setStatus('Speaking...');
+          speakText(reply, () => {
+            stopLipSync();
+            playAnimation('Idle', true);
+            setStatus('Ready');
+          });
+        } else {
+          playAnimation('Idle', true);
+          setStatus('Ready');
+        }
+      };
+
+      window.avatarThink = () => {
+        const thinkAction = findAction('Thinking');
+        if (thinkAction) playAnimation('Thinking', true);
+        setStatus('Thinking...');
+      };
+    }
+  }, [ttsEnabled, playAnimation, playOnceReturnToIdle, startLipSync, stopLipSync, speakText]);
+
   // ── Speech Recognition (Mic) ──
   const handleMic = useCallback(() => {
     if (typeof window === 'undefined') return;
@@ -440,7 +475,7 @@ export default function AvatarChat() {
       </div>
 
       {/* ── Chat Panel ── */}
-      <div className="w-full lg:w-[380px] shrink-0 flex flex-col bg-white border-[4px] border-ink rounded-3xl shadow-[8px_8px_0_#1A1A2E] overflow-hidden h-[400px] lg:h-auto">
+      <div className="chat-panel w-full lg:w-[380px] shrink-0 flex flex-col bg-white border-[4px] border-ink rounded-3xl shadow-[8px_8px_0_#1A1A2E] overflow-hidden h-[400px] lg:h-auto">
         
         {/* Chat header */}
         <div className="px-5 py-4 border-b-[4px] border-ink bg-cream flex items-center gap-3 shrink-0">
