@@ -167,19 +167,19 @@ class _ChatScreenState extends State<ChatScreen> {
                 color: IrisColors.ink.withValues(alpha: 0.6),
               ),
             ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
-            const SizedBox(height: 32),
+            const SizedBox(height: 16),
             _buildSuggestionCard(
               'Explain quantum computing simply',
               'Fast & cheap · Claude Haiku 4.5',
               IrisColors.sunny,
             ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             _buildSuggestionCard(
               'Write a Python script for data analysis',
               'Balanced · Kimi K2.6',
               IrisColors.mint,
             ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.1),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             _buildSuggestionCard(
               'Analyze this complex legal document',
               'High Reasoning · Claude Sonnet 4.6',
@@ -196,7 +196,7 @@ class _ChatScreenState extends State<ChatScreen> {
       onTap: () => _handleSend(text),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: IrisColors.white,
           borderRadius: IrisRadius.medium,

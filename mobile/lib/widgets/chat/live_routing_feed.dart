@@ -36,7 +36,7 @@ class LiveRoutingFeed extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -92,7 +92,7 @@ class LiveRoutingFeed extends StatelessWidget {
             color: IrisColors.ink,
           ),
           ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 300),
+            constraints: const BoxConstraints(maxHeight: 120),
             child: events.isEmpty
                 ? Center(
                     child: Padding(
@@ -132,7 +132,7 @@ class LiveRoutingFeed extends StatelessWidget {
                   )
                 : ListView.builder(
                     shrinkWrap: true,
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     itemCount: events.length,
                     itemBuilder: (context, index) {
                       final event = events[index];

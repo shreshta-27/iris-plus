@@ -77,7 +77,7 @@ class _ChatInputState extends State<ChatInput> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: IrisColors.white,
         border: const Border(top: BorderSide(color: IrisColors.ink, width: 4)),
@@ -131,8 +131,8 @@ class _ChatInputState extends State<ChatInput> {
               GestureDetector(
                 onTap: widget.disabled || _isUploading ? null : _handleAttach,
                 child: Container(
-                  width: 56,
-                  height: 56,
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
                     color: widget.disabled ? IrisColors.cream : IrisColors.white,
                     shape: BoxShape.circle,
@@ -171,7 +171,7 @@ class _ChatInputState extends State<ChatInput> {
                     ),
                     filled: true,
                     fillColor: widget.disabled ? IrisColors.cream : IrisColors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     border: OutlineInputBorder(
                       borderRadius: IrisRadius.full,
                       borderSide: const BorderSide(color: IrisColors.ink, width: 4),
@@ -195,8 +195,8 @@ class _ChatInputState extends State<ChatInput> {
               GestureDetector(
                 onTap: widget.disabled || _isUploading ? null : _handleSend,
                 child: Container(
-                  width: 56,
-                  height: 56,
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
                     color: widget.disabled || _isUploading ? IrisColors.cream : IrisColors.irisPurple,
                     shape: BoxShape.circle,

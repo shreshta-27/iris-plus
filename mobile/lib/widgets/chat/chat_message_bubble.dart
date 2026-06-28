@@ -16,16 +16,16 @@ class ChatMessageBubble extends StatelessWidget {
     final isUser = message.role == 'user';
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 12),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isUser) _buildAvatar(isUser),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           Flexible(
             child: Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: isUser ? IrisColors.cream : IrisColors.white,
                 borderRadius: BorderRadius.only(
@@ -111,7 +111,7 @@ class ChatMessageBubble extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           if (isUser) _buildAvatar(isUser),
         ],
       ),
@@ -120,8 +120,8 @@ class ChatMessageBubble extends StatelessWidget {
 
   Widget _buildAvatar(bool isUser) {
     return Container(
-      width: 40,
-      height: 40,
+      width: 32,
+      height: 32,
       decoration: BoxDecoration(
         color: isUser ? IrisColors.peach : IrisColors.mint,
         shape: BoxShape.circle,
@@ -132,7 +132,7 @@ class ChatMessageBubble extends StatelessWidget {
         child: Icon(
           isUser ? Icons.person_outline : Icons.auto_awesome,
           color: IrisColors.ink,
-          size: 20,
+          size: 16,
         ),
       ),
     );
