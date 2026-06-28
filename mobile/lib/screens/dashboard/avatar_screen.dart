@@ -7,6 +7,11 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/chat_provider.dart';
+import 'dart:io';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:record/record.dart';
+import 'package:path_provider/path_provider.dart';
 
 class AvatarScreen extends StatefulWidget {
   const AvatarScreen({super.key});
@@ -20,7 +25,9 @@ class _AvatarScreenState extends State<AvatarScreen> {
   final ScrollController _scrollController = ScrollController();
   late final WebViewController _webViewController;
   bool _isWebViewLoading = true;
-  bool _isListening = false; // Mock for mic button state
+  bool _isListening = false;
+  final _audioRecorder = AudioRecorder();
+  String? _recordFilePath;
 
   @override
   void initState() {
@@ -77,25 +84,66 @@ class _AvatarScreenState extends State<AvatarScreen> {
     });
   }
 
-  void _toggleMic() {
-    // In a real app, integrate speech_to_text package here
-    setState(() {
-      _isListening = !_isListening;
-    });
+  Future<void> _toggleMic() async {
     if (_isListening) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Microphone access would be requested here.',
-            style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
-          ),
-          backgroundColor: IrisColors.irisPurple,
-          duration: const Duration(seconds: 2),
-        ),
-      );
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) setState(() => _isListening = false);
-      });
+      // Stop recording
+      final path = await _audioRecorder.stop();
+      setState(() => _isListening = false);
+      
+      if (path != null) {
+        _uploadAudioAndTranscribe(path);
+      }
+    } else {
+      // Start recording
+      if (await _audioRecorder.hasPermission()) {
+        final dir = await getApplicationDocumentsDirectory();
+        final filePath = '${dir.path}/speech_${DateTime.now().millisecondsSinceEpoch}.m4a';
+        
+        await _audioRecorder.start(
+          const RecordConfig(encoder: AudioEncoder.aacLc),
+          path: filePath,
+        );
+        setState(() => _isListening = true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Microphone permission required for Speech-to-Text')),
+        );
+      }
+    }
+  }
+
+  Future<void> _uploadAudioAndTranscribe(String path) async {
+    try {
+      final chatProvider = context.read<ChatProvider>();
+      chatProvider.setLoading(true);
+
+      final uri = Uri.parse('$backendUrl/api/stt/transcribe');
+      final request = http.MultipartRequest('POST', uri)
+        ..files.add(await http.MultipartFile.fromPath('file', path));
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(responseBody);
+        final transcript = data['text'] ?? '';
+        
+        if (transcript.isNotEmpty && mounted) {
+          final escapedText = transcript.replaceAll("'", "\\'").replaceAll('\n', '\\n');
+          _webViewController.runJavaScript("if(window.avatarReceiveNativeSTT) window.avatarReceiveNativeSTT('$escapedText');");
+        }
+      } else {
+        debugPrint('STT Failed: $responseBody');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not transcribe audio. Please try again.')),
+        );
+      }
+    } catch (e) {
+      debugPrint('STT Error: $e');
+    } finally {
+      if (mounted) {
+        context.read<ChatProvider>().setLoading(false);
+      }
     }
   }
 

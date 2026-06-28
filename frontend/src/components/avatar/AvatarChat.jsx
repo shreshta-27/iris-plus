@@ -491,7 +491,8 @@ export default function AvatarChat() {
 
     try {
       // Call our backend TTS endpoint (Smallest.ai Waves)
-      const response = await fetch('http://localhost:5000/api/tts/synthesize', {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000';
+      const response = await fetch(`${API_URL}/api/tts/synthesize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -669,8 +670,12 @@ export default function AvatarChat() {
         if (thinkAction) playAnimation('Thinking', true);
         setStatus('Thinking...');
       };
+      
+      window.avatarReceiveNativeSTT = (text) => {
+        handleSend(text);
+      };
     }
-  }, [ttsEnabled, playAnimation, startLipSync, stopLipSync, speakText]);
+  }, [ttsEnabled, playAnimation, startLipSync, stopLipSync, speakText, handleSend]);
 
   // ── Speech Recognition (Mic) ──
   const handleMic = useCallback(() => {

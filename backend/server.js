@@ -14,6 +14,7 @@ import budgetRoutes from './routes/budget.routes.js';
 import analyticsRoutes from './routes/analytics.routes.js';
 import uploadRoutes from './routes/upload.routes.js';
 import ttsRoutes from './routes/tts.routes.js';
+import sttRoutes from './routes/stt.routes.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 
 dotenv.config();
@@ -42,6 +43,7 @@ app.use('/api/budget', budgetRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/tts', ttsRoutes);
+app.use('/api/stt', sttRoutes);
 
 app.use(errorHandler);
 
