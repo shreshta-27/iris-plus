@@ -1,3 +1,5 @@
+import 'package:webview_flutter/webview_flutter.dart';
+import '../../core/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -17,7 +19,26 @@ class AvatarScreen extends StatefulWidget {
 class _AvatarScreenState extends State<AvatarScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  bool _isOrbActive = false;
+  late final WebViewController _webViewController;
+  bool _isWebViewLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _webViewController = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(Colors.transparent)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageFinished: (String url) {
+            if (mounted) {
+              setState(() => _isWebViewLoading = false);
+            }
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse('$frontendUrl/avatar-only'));
+  }
 
   void _sendMessage() {
     final text = _controller.text.trim();
@@ -27,11 +48,8 @@ class _AvatarScreenState extends State<AvatarScreen> {
     final authProvider = context.read<AuthProvider>();
     final chatProvider = context.read<ChatProvider>();
     
-    setState(() => _isOrbActive = true);
-    
     chatProvider.sendMessage(text, authProvider.userId).then((_) {
       if (mounted) {
-        setState(() => _isOrbActive = false);
         _scrollToBottom();
       }
     });
@@ -60,9 +78,9 @@ class _AvatarScreenState extends State<AvatarScreen> {
           body: SafeArea(
             child: Column(
               children: [
-                // Header with Orb
+                // Header with WebView 3D Avatar
                 Container(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  height: 250, // Give fixed height for avatar area
                   decoration: BoxDecoration(
                     color: IrisColors.white,
                     border: const Border(bottom: BorderSide(color: IrisColors.ink, width: 3)),
@@ -74,33 +92,28 @@ class _AvatarScreenState extends State<AvatarScreen> {
                       ),
                     ],
                   ),
-                  child: Column(
+                  child: Stack(
                     children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: _isOrbActive || chatProvider.isLoading ? IrisColors.mint : IrisColors.sky,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: IrisColors.ink, width: 3),
-                          boxShadow: IrisShadows.small(),
+                      WebViewWidget(controller: _webViewController),
+                      if (_isWebViewLoading)
+                        const Center(
+                          child: CircularProgressIndicator(
+                            color: IrisColors.irisPurple,
+                          ),
                         ),
-                        child: Icon(
-                          _isOrbActive || chatProvider.isLoading ? Icons.graphic_eq : Icons.mic_none,
-                          size: 32,
-                          color: IrisColors.ink,
-                        ),
-                      ).animate(
-                        target: (_isOrbActive || chatProvider.isLoading) ? 1 : 0,
-                        onPlay: (controller) => controller.repeat(reverse: true),
-                      ).scaleXY(end: 1.1, duration: 600.ms, curve: Curves.easeInOut),
-                      const SizedBox(height: 12),
-                      Text(
-                        'IRIS ✦ Assistant',
-                        style: GoogleFonts.spaceGrotesk(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w900,
-                          color: IrisColors.ink,
+                      // Overlay Assistant Text
+                      Positioned(
+                        bottom: 16,
+                        left: 0,
+                        right: 0,
+                        child: Text(
+                          'IRIS ✦ Assistant',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            color: IrisColors.ink,
+                          ),
                         ),
                       ),
                     ],

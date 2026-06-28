@@ -5,10 +5,14 @@ class CareerProvider extends ChangeNotifier {
   final ApiService _api = ApiService();
 
   List<dynamic>? _paths;
+  Map<String, dynamic>? _routing;
+  Map<String, dynamic>? _cost;
   bool _isLoading = false;
   String? _error;
 
   List<dynamic>? get paths => _paths;
+  Map<String, dynamic>? get routing => _routing;
+  Map<String, dynamic>? get cost => _cost;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -20,6 +24,8 @@ class CareerProvider extends ChangeNotifier {
     _isLoading = true;
     _error = null;
     _paths = null;
+    _routing = null;
+    _cost = null;
     notifyListeners();
 
     try {
@@ -29,6 +35,8 @@ class CareerProvider extends ChangeNotifier {
         'sessionId': sessionId,
       });
       _paths = res['paths'] is List ? res['paths'] : [];
+      _routing = res['routing'] is Map<String, dynamic> ? res['routing'] : null;
+      _cost = res['cost'] is Map<String, dynamic> ? res['cost'] : null;
       _isLoading = false;
       notifyListeners();
     } on ApiException catch (e) {
@@ -42,6 +50,8 @@ class CareerProvider extends ChangeNotifier {
 
   void reset() {
     _paths = null;
+    _routing = null;
+    _cost = null;
     _error = null;
     notifyListeners();
   }
@@ -51,3 +61,4 @@ class CareerProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
+

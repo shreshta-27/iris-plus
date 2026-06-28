@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
-final String apiUrl = kIsWeb ? 'http://localhost:5000' : 'http://127.0.0.1:5000';
-
+final String apiUrl = kIsWeb ? 'http://localhost:5000' : 'http://10.0.2.2:5000';
+final String frontendUrl = kIsWeb ? 'http://localhost:3000' : 'http://10.0.2.2:3000';
 const Map<String, String> modelDisplayNames = {
   'mzai:moonshotai/Kimi-K2.6': 'Kimi K2.6',
   'anthropic:claude-haiku-4-5': 'Claude Haiku 4.5',

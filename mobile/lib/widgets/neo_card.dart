@@ -50,10 +50,10 @@ class NeoCard extends StatelessWidget {
             color: backgroundColor ?? IrisColors.white,
             border: Border(
               top: topBorderColor != null 
-                  ? BorderSide(color: topBorderColor!, width: topBorderWidth - borderWidth) 
+                  ? BorderSide(color: topBorderColor!, width: (topBorderWidth - borderWidth).clamp(0.0, double.infinity)) 
                   : BorderSide.none,
               left: leftBorderColor != null 
-                  ? BorderSide(color: leftBorderColor!, width: leftBorderWidth - borderWidth) 
+                  ? BorderSide(color: leftBorderColor!, width: (leftBorderWidth - borderWidth).clamp(0.0, double.infinity)) 
                   : BorderSide.none,
             ),
           ),

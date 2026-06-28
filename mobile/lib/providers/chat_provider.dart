@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import '../core/api_service.dart';
 
 class ChatMessage {
@@ -89,5 +90,24 @@ class ChatProvider extends ChangeNotifier {
   void clearMessages() {
     _messages.clear();
     notifyListeners();
+  }
+
+  Future<String?> uploadDocument(String filePath) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(filePath, filename: filePath.split('/').last),
+      });
+      final res = await _api.postFormData('/api/upload/document', formData);
+      _isLoading = false;
+      notifyListeners();
+      return res['text']?.toString();
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      return null;
+    }
   }
 }
