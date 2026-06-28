@@ -26,7 +26,13 @@ export async function register(req, res, next) {
     if (!name || !email || !password) return res.status(400).json({ error: 'All fields required' });
 
     const exists = await User.findOne({ email });
-    if (exists) return res.status(409).json({ error: 'Email already registered' });
+    if (exists) {
+      if (!exists.isVerified) {
+        await User.deleteOne({ email });
+      } else {
+        return res.status(409).json({ error: 'Email already registered' });
+      }
+    }
 
     const hashedPassword = await bcrypt.hash(password, 12);
     const otp = generateOTP();
@@ -78,6 +84,7 @@ export async function verifyOTP(req, res, next) {
     return res.json({
       message: 'Email verified successfully',
       user: { id: user._id, name: user.name, email: user.email },
+      token,
     });
   } catch (err) {
     next(err);
@@ -134,7 +141,10 @@ export async function login(req, res, next) {
     const token = createToken(user._id);
     setTokenCookie(res, token);
 
-    return res.json({ user: { id: user._id, name: user.name, email: user.email } });
+    return res.json({ 
+      user: { id: user._id, name: user.name, email: user.email },
+      token
+    });
   } catch (err) {
     next(err);
   }
@@ -196,6 +206,7 @@ export async function verifyLoginOTP(req, res, next) {
     return res.json({
       message: 'Logged in successfully',
       user: { id: user._id, name: user.name, email: user.email },
+      token,
     });
   } catch (err) {
     next(err);

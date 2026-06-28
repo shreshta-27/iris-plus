@@ -37,6 +37,9 @@ class AuthProvider extends ChangeNotifier {
         'email': email,
         'password': password,
       });
+      if (data['token'] != null) {
+        await _api.setToken(data['token']);
+      }
       _user = data['user'];
       _isLoading = false;
       notifyListeners();
@@ -79,6 +82,9 @@ class AuthProvider extends ChangeNotifier {
         'userId': userId,
         'otp': otp,
       });
+      if (data['token'] != null) {
+        await _api.setToken(data['token']);
+      }
       _user = data['user'];
       _isLoading = false;
       notifyListeners();
@@ -122,6 +128,9 @@ class AuthProvider extends ChangeNotifier {
         'userId': userId,
         'otp': otp,
       });
+      if (data['token'] != null) {
+        await _api.setToken(data['token']);
+      }
       _user = data['user'];
       _isLoading = false;
       notifyListeners();

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'constants.dart';
 
 class ApiService {
@@ -10,6 +11,7 @@ class ApiService {
 
   late final Dio _dio;
   late final CookieJar _cookieJar;
+  String? _token;
 
   ApiService._internal() {
     _cookieJar = CookieJar();
@@ -26,6 +28,25 @@ class ApiService {
     if (!kIsWeb) {
       _dio.interceptors.add(CookieManager(_cookieJar));
     }
+
+    _dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        if (_token == null) {
+          final prefs = await SharedPreferences.getInstance();
+          _token = prefs.getString('iris_token');
+        }
+        if (_token != null) {
+          options.headers['Authorization'] = 'Bearer $_token';
+        }
+        return handler.next(options);
+      },
+    ));
+  }
+
+  Future<void> setToken(String token) async {
+    _token = token;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('iris_token', token);
   }
 
   Dio get dio => _dio;
@@ -72,6 +93,8 @@ class ApiService {
     if (data is Map<String, dynamic>) {
       message = data['error'] ?? data['message'] ?? message;
       injectionDetected = data['injectionDetected'] == true;
+    } else if (e.message != null && e.message!.isNotEmpty) {
+      message = 'Network error: ${e.message}';
     }
 
     return ApiException(
@@ -84,6 +107,9 @@ class ApiService {
 
   Future<void> clearCookies() async {
     await _cookieJar.deleteAll();
+    _token = null;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('iris_token');
   }
 }
 
