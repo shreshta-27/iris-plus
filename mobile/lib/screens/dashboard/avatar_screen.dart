@@ -113,7 +113,7 @@ class _AvatarScreenState extends State<AvatarScreen> {
                 // 3D Avatar Viewport
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 250),
-                  height: isKeyboardOpen ? 150 : 350,
+                  height: isKeyboardOpen ? 140 : 280,
                   decoration: BoxDecoration(
                     color: IrisColors.white,
                     border: const Border(bottom: BorderSide(color: IrisColors.ink, width: 4)),
