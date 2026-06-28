@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme.dart';
+import '../../core/socket_service.dart';
 import '../../providers/analytics_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../widgets/neo_card.dart';
 import '../../widgets/injection_badge.dart';
 
@@ -16,12 +18,36 @@ class SecurityScreen extends StatefulWidget {
 }
 
 class _SecurityScreenState extends State<SecurityScreen> {
+  final SocketService _socketService = SocketService();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       context.read<AnalyticsProvider>().fetchSecurity();
+      
+      final auth = context.read<AuthProvider>();
+      if (!_socketService.isConnected) {
+        _socketService.connect(auth.userId);
+      }
     });
+    _socketService.addRoutingListener(_onRoutingEvent);
+  }
+
+  void _onRoutingEvent(Map<String, dynamic> event) {
+    // If an injection is blocked or a routing decision is made, refresh security stats
+    if (event['type'] == 'injection_blocked' || event['type'] == 'routing_decision') {
+      if (mounted) {
+        context.read<AnalyticsProvider>().fetchSecurity();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _socketService.removeRoutingListener(_onRoutingEvent);
+    super.dispose();
   }
 
   @override
