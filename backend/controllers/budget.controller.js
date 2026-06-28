@@ -2,7 +2,8 @@ import { getAllBudgetStats, resetBudget } from '../services/budget.service.js';
 
 export async function getBudgetStats(req, res, next) {
   try {
-    const stats = await getAllBudgetStats(req.params.sessionId);
+    const trackingId = req.user?.id || req.user?._id || req.params.sessionId;
+    const stats = await getAllBudgetStats(trackingId);
     return res.json(stats);
   } catch (err) {
     next(err);
@@ -11,8 +12,9 @@ export async function getBudgetStats(req, res, next) {
 
 export async function resetBudgetHandler(req, res, next) {
   try {
-    await resetBudget(req.params.sessionId);
-    const stats = await getAllBudgetStats(req.params.sessionId);
+    const trackingId = req.user?.id || req.user?._id || req.params.sessionId;
+    await resetBudget(trackingId);
+    const stats = await getAllBudgetStats(trackingId);
     return res.json({ message: 'Budget reset for demo', stats });
   } catch (err) {
     next(err);

@@ -12,6 +12,7 @@ import { useBudget } from '@/hooks/useBudget';
 export default function DashboardPage() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [socraticMode, setSocraticMode] = useState(false);
 
   const [user, setUser] = useState(null);
   
@@ -42,7 +43,7 @@ export default function DashboardPage() {
     setIsLoading(true);
 
     try {
-      const res = await api.post('/api/ai/chat', { message: text, sessionId });
+      const res = await api.post('/api/ai/chat', { message: text, sessionId, socraticMode });
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: res.answer,
@@ -83,6 +84,18 @@ export default function DashboardPage() {
         {stats && (
           <BudgetWarningBanner mode={stats.mode} />
         )}
+        <div className="flex items-center justify-between px-4 md:px-6 py-3 border-b-[3px] border-ink bg-cream shrink-0">
+           <div className="flex items-center gap-2">
+             <h2 className="font-black text-xs md:text-sm uppercase tracking-widest text-ink">IRIS Assistant</h2>
+           </div>
+           <button 
+             onClick={() => setSocraticMode(!socraticMode)}
+             className={`px-3 py-1 text-[10px] md:text-xs font-bold uppercase rounded-full border-2 border-ink shadow-[2px_2px_0_#1A1A2E] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0_#1A1A2E] ${socraticMode ? 'bg-mint' : 'bg-gray-100'}`}
+             title="Act as an AI Tutor to guide you without giving direct answers, protecting privacy."
+           >
+             Tutor Mode: {socraticMode ? 'ON' : 'OFF'}
+           </button>
+        </div>
         <ChatWindow messages={messages} isLoading={isLoading} />
         <ChatInput 
           onSend={handleSend} 

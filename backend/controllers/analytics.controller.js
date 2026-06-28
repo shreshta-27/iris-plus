@@ -42,36 +42,35 @@ export async function getAnalyticsDashboard(req, res, next) {
     // Sort richHistory by timestamp descending
     richHistory.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-    const history = tracker?.history || [];
-
-    // 2. Aggregate Model Usage & Savings
+    // 2. Aggregate Model Usage & Savings from ALL-TIME richHistory
     const modelDistribution = {};
     let totalCost = 0;
     let worstCaseCost = 0;
 
-    history.forEach(h => {
+    richHistory.forEach(h => {
       modelDistribution[h.model] = (modelDistribution[h.model] || 0) + 1;
-      totalCost += h.cost;
+      totalCost += h.cost || 0;
+      // We could use h.costSavings.worstCaseCost here if we want exactness, but keeping original logic:
       worstCaseCost += (250 / 1000000 * 3.00) + (300 / 1000000 * 15.00); 
     });
 
     // 3. Complexity Distribution
     const complexityBuckets = {
-      simple: history.filter(h => h.tier === 'simple').length,
-      medium: history.filter(h => h.tier === 'medium').length,
-      complex: history.filter(h => h.tier === 'complex').length,
+      simple: richHistory.filter(h => h.tier === 'simple').length,
+      medium: richHistory.filter(h => h.tier === 'medium').length,
+      complex: richHistory.filter(h => h.tier === 'complex').length,
     };
 
     return res.json({
       summary: {
-        totalCalls: history.length,
+        totalCalls: richHistory.length,
         totalCost: parseFloat(totalCost.toFixed(6)),
         savedCost: parseFloat((worstCaseCost - totalCost).toFixed(6)),
         savingsPercent: worstCaseCost > 0 ? parseFloat((((worstCaseCost - totalCost) / worstCaseCost) * 100).toFixed(1)) : 0,
       },
       modelDistribution,
       complexityBuckets,
-      recentHistory: richHistory.length > 0 ? richHistory.slice(-50).reverse() : history.slice(-50).reverse(), // Send rich history
+      recentHistory: richHistory, // Send the full rich history
     });
   } catch (err) {
     next(err);

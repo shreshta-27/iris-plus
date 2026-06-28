@@ -19,7 +19,7 @@ const MODEL_DISPLAY_NAMES = {
 
 export async function handleAIChat(req, res, next) {
   try {
-    const { message, sessionId, chatHistory = [] } = req.body;
+    const { message, sessionId, chatHistory = [], socraticMode = false } = req.body;
     const userId = req.user?._id || req.user?.id;
 
     if (!message?.trim()) {
@@ -37,7 +37,8 @@ export async function handleAIChat(req, res, next) {
       timestamp: new Date().toISOString()
     });
 
-    const budgetStatsBefore = await getAllBudgetStats(sessionId);
+    const trackingId = userId ? userId.toString() : (sessionId || 'demo-session-id');
+    const budgetStatsBefore = await getAllBudgetStats(trackingId);
 
     // 1. Zero-Cost Semantic Caching / RAG
     const ragResult = searchKnowledgeBase(message);
@@ -141,7 +142,7 @@ export async function handleAIChat(req, res, next) {
     // 3. Local Injection Detection (Layer 1)
     const localInjectionResult = detectInjection(message);
     if (localInjectionResult.isInjection) {
-      await recordBlockedCall(sessionId);
+      await recordBlockedCall(trackingId);
       
       await SecurityLog.create({
         sessionId,
@@ -184,7 +185,7 @@ export async function handleAIChat(req, res, next) {
     const baseModel = MODELS[classification.tier.toUpperCase()];
 
     // 5. Budget Status & Graceful Degradation
-    const budgetMode = await getBudgetMode(sessionId);
+    const budgetMode = await getBudgetMode(trackingId);
     if (budgetMode === 'exceeded') {
       return res.status(429).json({
         error: 'budget_exceeded',
@@ -193,11 +194,16 @@ export async function handleAIChat(req, res, next) {
       });
     }
 
-    const selectedModel = await getDegradedModel(sessionId, baseModel);
+    const selectedModel = await getDegradedModel(trackingId, baseModel);
     const degraded = selectedModel !== baseModel;
-    const degradeReason = degraded
-      ? `Budget ${budgetMode} — downgraded from ${MODEL_DISPLAY_NAMES[baseModel]} to ${MODEL_DISPLAY_NAMES[selectedModel]}`
-      : null;
+    
+    let degradeReason;
+    if (degraded) {
+      degradeReason = `[BUDGET FALLBACK] ⚠️ ${budgetMode.toUpperCase()} mode! Downgraded from ${MODEL_DISPLAY_NAMES[baseModel]} to Budget ${MODEL_DISPLAY_NAMES[selectedModel]}. Intent: ${classification.reason}`;
+    } else {
+      const tierName = classification.tier === 'simple' ? 'Budget' : 'Premium';
+      degradeReason = `[BUDGET HEALTHY] ✅ Sufficient funds ($${budgetStatsBefore.remaining.toFixed(2)} left). Safely routed to ${tierName} ${MODEL_DISPLAY_NAMES[selectedModel]}. Intent: ${classification.reason}`;
+    }
 
     let injectionStatus = localInjectionResult.threatLevel === 'suspicious' ? 'monitor' : 'clean';
     let otariResult;
@@ -207,7 +213,7 @@ export async function handleAIChat(req, res, next) {
       type: 'routing_step',
       step: 4,
       status: 'routing',
-      message: `Routed to ${MODEL_DISPLAY_NAMES[selectedModel]}. Reason: ${degradeReason || classification.reason}`,
+      message: `Routed to ${MODEL_DISPLAY_NAMES[selectedModel]}. ${degradeReason}`,
       timestamp: new Date().toISOString()
     });
 
@@ -227,10 +233,18 @@ export async function handleAIChat(req, res, next) {
           ...chatHistory.slice(-6),
           { role: 'user', content: message },
         ],
-        systemPrompt: `You are IRIS, an intelligent AI assistant for students. 
-          Be helpful, concise, and educational. 
-          Current budget mode: ${budgetMode}. 
-          Today's date: ${new Date().toLocaleDateString()}.`,
+        systemPrompt: socraticMode 
+          ? `You are IRIS, an intelligent AI Socratic Tutor for students. 
+             Your core directives:
+             1. NEVER just give the final answer to a homework, math, or coding problem. Instead, ask guiding questions and guide the student to figure it out themselves.
+             2. Protect privacy: Never ask for or reveal Personal Identifiable Information (PII).
+             3. Be helpful, concise, and educational.
+             Current budget mode: ${budgetMode}. 
+             Today's date: ${new Date().toLocaleDateString()}.`
+          : `You are IRIS, an intelligent AI assistant for students. 
+             Be helpful, concise, and educational. 
+             Current budget mode: ${budgetMode}. 
+             Today's date: ${new Date().toLocaleDateString()}.`,
         guardrailMode: 'block', // Enforce blocking at the gateway
         useWebSearch: classification.signals.needsWebSearch,
         sessionId,
@@ -315,7 +329,7 @@ export async function handleAIChat(req, res, next) {
     }
 
     // 9. Update Budget State
-    const budgetState = await recordSpend(sessionId, selectedModel, otariResult.cost, {
+    const budgetState = await recordSpend(trackingId, selectedModel, otariResult.cost, {
       tier: classification.tier,
       score: classification.score,
       reason: degradeReason || classification.reason,
