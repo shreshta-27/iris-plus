@@ -572,7 +572,7 @@ export default function AvatarChat() {
         setStatus('Thinking...');
       };
     }
-  }, [ttsEnabled, playAnimation, playOnceReturnToIdle, startLipSync, stopLipSync, speakText]);
+  }, [ttsEnabled, playAnimation, startLipSync, stopLipSync, speakText]);
 
   // ── Speech Recognition (Mic) ──
   const handleMic = useCallback(() => {
