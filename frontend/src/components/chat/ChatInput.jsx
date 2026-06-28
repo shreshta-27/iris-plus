@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef, useCallback } from 'react';
 import { RiSendPlaneLine, RiLoader4Line, RiErrorWarningLine, RiAttachmentLine, RiFileTextLine } from 'react-icons/ri';
+import { api } from '@/lib/api';
 
 export default function ChatInput({ onSend, disabled, budgetExceeded }) {
   const [message, setMessage] = useState('');
@@ -64,17 +65,7 @@ export default function ChatInput({ onSend, disabled, budgetExceeded }) {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:5000/api/upload/document', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('iris_token')}`,
-        },
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error('Upload failed');
-      
-      const data = await response.json();
+      const data = await api.post('/api/upload/document', formData);
       setAttachedFileText(data.text);
       setAttachedFileName(file.name);
     } catch (err) {

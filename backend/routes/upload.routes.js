@@ -18,7 +18,13 @@ router.post('/pdf', authenticate, upload.single('file'), async (req, res, next) 
     const data = await pdfParse(dataBuffer);
 
     // Clean up temp file
-    fs.unlinkSync(req.file.path);
+    if (req.file && fs.existsSync(req.file.path)) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (e) {
+        console.error("Cleanup error in pdf route:", e);
+      }
+    }
 
     return res.json({
       text: data.text,
@@ -27,7 +33,9 @@ router.post('/pdf', authenticate, upload.single('file'), async (req, res, next) 
     });
   } catch (err) {
     if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch(e) {}
     }
     next(err);
   }

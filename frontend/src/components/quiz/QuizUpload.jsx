@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { RiUploadCloud2Line, RiLoader4Line, RiBookOpenLine, RiCheckLine, RiErrorWarningLine } from 'react-icons/ri';
+import { api } from '@/lib/api';
 
 export default function QuizUpload({ onGenerate, loading }) {
   const [topic, setTopic] = useState('');
@@ -35,17 +36,7 @@ export default function QuizUpload({ onGenerate, loading }) {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:5000/api/upload/pdf', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('iris_token')}`,
-        },
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error('Upload failed');
-
-      const data = await response.json();
+      const data = await api.post('/api/upload/pdf', formData);
       setNoteContent(data.text);
     } catch (err) {
       console.error(err);
