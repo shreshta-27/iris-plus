@@ -18,7 +18,11 @@ import fetch from 'node-fetch';
 
 async function searchWeb(query) {
   try {
-    const res = await fetch(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`);
+    const res = await fetch(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
     const text = await res.text();
     const snippetRegex = /<a class="result__snippet[^>]*>(.*?)<\/a>/g;
     const snippets = [];
@@ -26,9 +30,14 @@ async function searchWeb(query) {
     while ((match = snippetRegex.exec(text)) !== null && snippets.length < 5) {
       snippets.push(match[1].replace(/<\/?[^>]+(>|$)/g, ""));
     }
+    
+    if (snippets.length === 0) {
+      return '[SYSTEM: A live web search was attempted but no recent results were found. Please answer the user\'s query based on your existing knowledge base.]';
+    }
+    
     return snippets.join('\n\n');
   } catch (e) {
-    return 'Web search failed or timed out.';
+    return '[SYSTEM: The live web search timed out or failed. Please answer based on your existing knowledge base.]';
   }
 }
 
