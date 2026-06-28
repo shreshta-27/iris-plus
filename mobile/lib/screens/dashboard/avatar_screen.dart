@@ -117,7 +117,7 @@ class _AvatarScreenState extends State<AvatarScreen> {
       final chatProvider = context.read<ChatProvider>();
       chatProvider.setLoading(true);
 
-      final uri = Uri.parse('$backendUrl/api/stt/transcribe');
+      final uri = Uri.parse('$apiUrl/api/stt/transcribe');
       final request = http.MultipartRequest('POST', uri)
         ..files.add(await http.MultipartFile.fromPath('file', path));
 
