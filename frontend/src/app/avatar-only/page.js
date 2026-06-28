@@ -23,11 +23,14 @@ export default function AvatarOnlyPage() {
         .chat-panel {
           display: none !important;
         }
-        canvas {
-          height: 100vh !important;
+        .avatar-viewport {
+          border: none !important;
+          border-radius: 0 !important;
+          box-shadow: none !important;
+          background-color: transparent !important;
         }
       `}</style>
-      <div className="h-screen w-screen transform flex items-center justify-center pt-10">
+      <div className="h-screen w-screen absolute inset-0">
         <AvatarChat />
       </div>
     </div>

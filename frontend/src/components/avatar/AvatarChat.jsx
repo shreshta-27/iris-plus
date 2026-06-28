@@ -60,7 +60,7 @@ export default function AvatarChat() {
 
       // Scene with light cream background
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0xfff8f0);
+      // scene.background = new THREE.Color(0xfff8f0);
       sceneRef.current = scene;
 
       // Camera — portrait framing for upper body
@@ -437,7 +437,7 @@ export default function AvatarChat() {
     <div className="h-full flex flex-col lg:flex-row gap-4 lg:gap-6">
 
       {/* ── 3D Avatar Viewport ── */}
-      <div className="flex-1 min-h-[350px] lg:min-h-0 bg-white border-[4px] border-ink rounded-3xl shadow-[8px_8px_0_#1A1A2E] overflow-hidden relative">
+      <div className="avatar-viewport flex-1 min-h-[350px] lg:min-h-0 bg-white border-[4px] border-ink rounded-3xl shadow-[8px_8px_0_#1A1A2E] overflow-hidden relative">
         <div ref={mountRef} className="w-full h-full" />
 
         {/* Status pill */}
